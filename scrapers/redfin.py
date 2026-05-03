@@ -59,11 +59,18 @@ LOG = logging.getLogger("redfin")
 
 REDFIN_GIS_CSV = "https://www.redfin.com/stingray/api/gis-csv"
 
-STATUS_CODES = {
-    "active": "9",
-    "sold": "7",
-    "pending": "11",
+# Redfin's gis-csv endpoint distinguishes active vs sold via the `sf`
+# (search filter) param, NOT the `status` param. status=9 still has to be
+# passed for either, but sf=1,2,3,5,6,7 = for-sale set and sf=2 = past sale.
+SEARCH_FILTERS = {
+    "active": "1,2,3,5,6,7",
+    "sold": "2",
+    "pending": "5",
 }
+
+# How far back to pull sold comps. 180d gives ~enough sample for $/sqft medians
+# without polluting with pre-rate-cycle comps.
+SOLD_WITHIN_DAYS = 180
 
 # Buy-box widened slightly to catch listings just outside that may have
 # room to negotiate. Filtering to the actual buy-box happens in scoring.
@@ -100,11 +107,13 @@ def fetch_bbox(
         "num_homes": "350",
         "ord": "redfin-recommended-asc",
         "page_number": "1",
-        "sf": "1,2,3,5,6,7",
-        "status": STATUS_CODES[status],
+        "sf": SEARCH_FILTERS[status],
+        "status": "9",
         "uipt": "1,2,3,4,5,6,7,8",
         "v": "8",
     }
+    if status == "sold":
+        params["sold_within_days"] = str(SOLD_WITHIN_DAYS)
     url = f"{REDFIN_GIS_CSV}?{urlencode(params)}"
     rate.wait()
     LOG.info("GET %s", url)
@@ -172,7 +181,7 @@ def _safe_float(v) -> float | None:
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     parser = argparse.ArgumentParser()
-    parser.add_argument("--status", choices=list(STATUS_CODES), default="active")
+    parser.add_argument("--status", choices=list(SEARCH_FILTERS), default="active")
     parser.add_argument("--min-price", type=int, default=DEFAULT_MIN_PRICE)
     parser.add_argument("--max-price", type=int, default=DEFAULT_MAX_PRICE)
     parser.add_argument("--rate-seconds", type=float, default=4.0,
