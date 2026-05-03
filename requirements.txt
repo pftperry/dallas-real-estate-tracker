@@ -1,0 +1,2 @@
+# Pure-stdlib by design — keep deps minimal.
+# Optional: add `requests` if you replace urllib with retrying client.

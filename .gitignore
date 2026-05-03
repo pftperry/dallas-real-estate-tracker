@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Node / Observable
+node_modules/
+dist/
+src/.observablehq/cache/
+
+# DCAD bulk cache (huge files, regenerable)
+data/.cache/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Local env
+.env
+.env.local
