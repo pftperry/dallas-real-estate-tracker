@@ -62,6 +62,24 @@
       "bbox": {"sw_lat": 32.815, "sw_lng": -96.785, "ne_lat": 32.840, "ne_lng": -96.770}
     },
     {
+      "id": "caruth_terrace",
+      "name": "Caruth Terrace",
+      "zip_codes": ["75206"],
+      "lakewood_orbit": 0.85,
+      "school_district": "DISD",
+      "feeder_pattern": "Woodrow Wilson HS / J.L. Long MS / Mockingbird Elementary",
+      "school_quality_score": 10,
+      "tier_override_reason": "Mockingbird Elementary feeder",
+      "median_sale_12mo_usd": 653750,
+      "median_sale_recent_usd": 653750,
+      "dom_recent_days": 66,
+      "ppsf_usd": 378,
+      "yoy_appreciation_pct": 36.2,
+      "tier": "S",
+      "notes": "Tier S because of Mockingbird Elementary feeder. Small enclave east of Greenville Ave, between Mockingbird Ln (N) and Belmont/Vanderbilt (S). Listings typically start ~$650K and reach $1M+ for renovated mid-century. 66 DOM = some negotiation room. Recent +36% YoY $/sqft is a thin-sample yellow flag -- verify against same-block comps before paying ask.",
+      "bbox": {"sw_lat": 32.838, "sw_lng": -96.770, "ne_lat": 32.850, "ne_lng": -96.755}
+    },
+    {
       "id": "lake_park_estates",
       "name": "Lake Park Estates",
       "zip_codes": ["75218"],
