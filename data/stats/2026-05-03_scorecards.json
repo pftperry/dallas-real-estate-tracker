@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-05-03T22:22:04Z",
+  "as_of": "2026-05-03T22:45:27Z",
   "scorecards": [
     {
       "id": "forest_hills",
@@ -11,10 +11,10 @@
       "config_median_12mo_usd": 759750,
       "config_yoy_pct": 9.0,
       "active": {
-        "n": 25,
-        "median_price_usd": 849999,
-        "median_ppsf_usd": 339,
-        "median_dom_days": 39
+        "n": 3,
+        "median_price_usd": 795000,
+        "median_ppsf_usd": 433,
+        "median_dom_days": 24
       },
       "sold_30d": {
         "n": 0,
@@ -68,8 +68,8 @@
     {
       "id": "m_streets",
       "name": "M Streets / Greenland Hills",
-      "tier": "S",
-      "lakewood_orbit": 0.9,
+      "tier": "A",
+      "lakewood_orbit": 0.85,
       "school_district": "DISD",
       "school_quality_score": 9,
       "config_median_12mo_usd": 865000,
@@ -79,6 +79,38 @@
         "median_price_usd": 925000,
         "median_ppsf_usd": 388,
         "median_dom_days": 23
+      },
+      "sold_30d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "sold_90d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "sold_365d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "turnover_proxy": 0.0
+    },
+    {
+      "id": "lake_park_estates",
+      "name": "Lake Park Estates",
+      "tier": "A",
+      "lakewood_orbit": 0.95,
+      "school_district": "DISD",
+      "school_quality_score": 6,
+      "config_median_12mo_usd": 700000,
+      "config_yoy_pct": null,
+      "active": {
+        "n": 20,
+        "median_price_usd": 799900.0,
+        "median_ppsf_usd": 314.0,
+        "median_dom_days": 35.5
       },
       "sold_30d": {
         "n": 0,
@@ -331,10 +363,10 @@
       "config_median_12mo_usd": 603000,
       "config_yoy_pct": -11.0,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 8,
+        "median_price_usd": 862499.5,
+        "median_ppsf_usd": 329.5,
+        "median_dom_days": 35.0
       },
       "sold_30d": {
         "n": 0,
@@ -351,7 +383,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "mockingbird_meadows",
@@ -416,6 +448,38 @@
         "median_ppsf_usd": null
       },
       "turnover_proxy": 0.0
+    },
+    {
+      "id": "little_forest_hills",
+      "name": "Little Forest Hills",
+      "tier": "",
+      "lakewood_orbit": 0.9,
+      "school_district": null,
+      "school_quality_score": null,
+      "config_median_12mo_usd": 480000,
+      "config_yoy_pct": -41.0,
+      "active": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null,
+        "median_dom_days": null
+      },
+      "sold_30d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "sold_90d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "sold_365d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "turnover_proxy": null
     }
   ]
 }
