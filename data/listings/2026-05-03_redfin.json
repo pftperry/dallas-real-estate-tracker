@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-05-03T22:08:47Z",
+  "as_of": "2026-05-03T22:22:03Z",
   "source": "Redfin gis-csv",
   "status": "active",
   "filters": {
@@ -349,8 +349,8 @@
       "hoa_per_month_usd": 25,
       "property_type": "Single Family Residential",
       "status": "Active",
-      "next_open_house_start": "May-3-2026 03:00 PM",
-      "next_open_house_end": "May-3-2026 05:00 PM",
+      "next_open_house_start": "",
+      "next_open_house_end": "",
       "url": "https://www.redfin.com/TX/Dallas/965-Easton-Pl-75218/home/30866701",
       "lat": 32.8461485,
       "lng": -96.6966298,
