@@ -23,8 +23,8 @@
       "ppsf_usd": null,
       "yoy_appreciation_pct": 9.0,
       "tier": "S",
-      "notes": "Lakewood-side, larger lots than Hollywood Heights, walkable to WRL and Arboretum. Slowing market = buyer leverage.",
-      "bbox": {"sw_lat": 32.835, "sw_lng": -96.730, "ne_lat": 32.864, "ne_lng": -96.690}
+      "notes": "Historic Forest Hills proper -- between Garland Rd and Edmondson, west of Buckner. Lakewood-side, larger lots than Hollywood Heights, walkable to WRL and Arboretum. Slowing market = buyer leverage. Note: Redfin loosely tags adjacent subdivisions (Wyrick Estates, Lake Park, etc.) as 'Forest Hills'; the bbox here matches the *true* historic boundary, so some Redfin-tagged 'Forest Hills' listings will land in Lake Park Estates instead.",
+      "bbox": {"sw_lat": 32.838, "sw_lng": -96.717, "ne_lat": 32.852, "ne_lng": -96.700}
     },
     {
       "id": "hollywood_heights",
@@ -47,7 +47,7 @@
       "id": "m_streets",
       "name": "M Streets / Greenland Hills",
       "zip_codes": ["75206"],
-      "lakewood_orbit": 0.9,
+      "lakewood_orbit": 0.85,
       "school_district": "DISD",
       "feeder_pattern": "Woodrow Wilson HS / J.L. Long MS / Mockingbird Elementary",
       "school_quality_score": 9,
@@ -56,9 +56,26 @@
       "dom_recent_days": null,
       "ppsf_usd": 447,
       "yoy_appreciation_pct": -6.9,
-      "tier": "S",
-      "notes": "Conservation district. More walkable/urban than Hollywood Heights, close to Greenville Ave restaurants. Slight $/sqft softening.",
+      "tier": "A",
+      "notes": "Conservation district. Walkable to Greenville Ave restaurants/nightlife. Demoted from S to A: walkable/urban character is meaningfully different from the lake-centric Lakewood vibe; not 'Lakewood-orbit' in spirit.",
       "bbox": {"sw_lat": 32.815, "sw_lng": -96.785, "ne_lat": 32.840, "ne_lng": -96.770}
+    },
+    {
+      "id": "lake_park_estates",
+      "name": "Lake Park Estates",
+      "zip_codes": ["75218"],
+      "lakewood_orbit": 0.95,
+      "school_district": "DISD",
+      "feeder_pattern": "Bryan Adams HS / Hill MS / Hexter Elementary",
+      "school_quality_score": 6,
+      "median_sale_12mo_usd": 700000,
+      "median_sale_recent_usd": 750000,
+      "dom_recent_days": null,
+      "ppsf_usd": null,
+      "yoy_appreciation_pct": null,
+      "tier": "A",
+      "notes": "North of historic Forest Hills, includes Lake Park Estates proper plus the newer adjacent subdivisions Redfin loosely tags as Forest Hills (Wyrick Estates, Eastwood Estates, Forest Hills Estates). Mid-century modern, large lots up to 0.5ac. Range $700K-$1.2M+. Bryan Adams feeder is the school weak point but lake-adjacency and lot premium offset for non-school-driven buyers.",
+      "bbox": {"sw_lat": 32.852, "sw_lng": -96.715, "ne_lat": 32.870, "ne_lng": -96.685}
     },
     {
       "id": "moss_farm",
@@ -212,6 +229,16 @@
       "yoy_appreciation_pct": null,
       "notes": "Out of band but track for spillover deals near $1.1M.",
       "bbox": {"sw_lat": 32.815, "sw_lng": -96.760, "ne_lat": 32.830, "ne_lng": -96.745}
+    },
+    {
+      "id": "little_forest_hills",
+      "name": "Little Forest Hills",
+      "zip_codes": ["75218"],
+      "lakewood_orbit": 0.9,
+      "median_sale_12mo_usd": 480000,
+      "yoy_appreciation_pct": -41.0,
+      "notes": "Quirky/artsy pocket east of White Rock Lake near the Arboretum. Mostly small cottages needing updates. Median $480K means most listings are below buy box. Track for the rare fully renovated cottage or new construction near $800K -- those are opportunistic but uncommon.",
+      "bbox": {"sw_lat": 32.832, "sw_lng": -96.722, "ne_lat": 32.845, "ne_lng": -96.708}
     }
   ],
   "bbox_disclaimer": "Bounding boxes are approximate and intended for v0 filtering. Refine using DCAD GIS shapefile data when polygon precision matters."

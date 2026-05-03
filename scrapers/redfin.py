@@ -142,6 +142,7 @@ def normalize(row: dict, areas: Iterable[SubArea]) -> dict:
         "city": row.get("CITY") or "",
         "state": row.get("STATE OR PROVINCE") or row.get("STATE") or "",
         "zip": (row.get("ZIP OR POSTAL CODE") or row.get("ZIP") or "").strip()[:5],
+        "mls_subdivision": (row.get("LOCATION") or "").strip(),
         "price_usd": _safe_int(row.get("PRICE")),
         "beds": _safe_float(row.get("BEDS")),
         "baths": _safe_float(row.get("BATHS")),

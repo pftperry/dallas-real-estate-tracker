@@ -119,19 +119,20 @@ display(ceiling.length
 
 ### Tier S — Lakewood-orbit prime focus
 
-Spend the most time here. Strong school feeders (Woodrow Wilson via Lakewood Elementary or Mockingbird), walkable to White Rock Lake, and your Lakewood preference is real.
+Spend the most time here. These are the closest thing to "Lakewood proper" that fit the buy box.
 
-- **Forest Hills (75218)** &mdash; Look for: 2,000–2,800 sqft homes with 8K+ lots, original or recently updated. Skip: anything backing onto Garland Rd or Buckner (busy). Median ~$759K (12mo) means $1.1M buys you the top quartile. Slowing market (48 DOM) = ask for terms (closing credit, repair credit) before discount.
+- **Forest Hills (75218)** &mdash; Look for: 2,000–2,800 sqft homes with 8K+ lots between Garland Rd and Edmondson Ave, west of Buckner. Skip: anything backing Garland Rd or Buckner (busy-street flag in the watchlist). Note: Redfin tags newer northern subdivisions (Wyrick Estates, Lake Park) as "Forest Hills" — those are now bucketed under Lake Park Estates here. Median ~$759K (12mo); $1.1M buys the top quartile. Slowing market (48 DOM) = ask for terms (closing credit, repair credit) before discount.
 - **Hollywood Heights / Santa Monica** &mdash; Look for: Tudor or Craftsman with original details. Skip: anything where exterior was recently changed without permits (conservation district = clawback risk). 47% YoY $/sqft pop is a yellow flag — verify with at least 3 same-block comps before paying ask.
-- **M Streets / Greenland Hills** &mdash; Look for: walking-distance-to-Greenville homes on the streets you want (Mercedes, Monticello, Martel are quietest). Skip: anything backing onto 75 / Knox-Henderson. Conservation district means buy with reno plans pre-approved or assume status quo. $865K median = your $1.1M buys above median, expect competition.
 
-### Tier A — RISD optionality + Casa Linda value
+### Tier A — RISD optionality + lake-adjacent value plays
 
 Watch closely. Pull the trigger if a strong listing appears.
 
+- **M Streets / Greenland Hills** *(demoted from S to A per critical review)* &mdash; Look for: Mercedes, Monticello, Martel — the quietest streets. Walkable to Greenville Ave (Walk Score ~75). Skip: anything backing 75 / Knox-Henderson. Conservation district. The "demotion" reasoning: walkable/urban character is meaningfully different from the lake-centric Lakewood vibe. Still a strong area, just not "Lakewood-orbit" in spirit.
 - **Moss Farm** &mdash; +26% YoY momentum is real but watch for thin-sample bias. Verify against the dispersion ranking before paying ask. Smaller sub-area (~30 homes), inventory turns over slowly.
 - **Merriman Park Estates** &mdash; 22 DOM = competitive. Don't try to negotiate hard on a fresh listing; either commit fast or pass. Best for renovated mid-century ranches; new construction here is rare.
 - **Casa Linda** &mdash; The undervalued pick. Bryan Adams feeder is the school weakness, but for a 5+ year hold before kindergarten, you're getting Lakewood-orbit walking distance to White Rock Lake at $700K median. Niche #11 in Dallas. If you find a renovated 2,500+ sqft here at $850–950K, that's a genuinely good trade.
+- **Lake Park Estates** *(new addition per critical review)* &mdash; Adjacent to Forest Hills, immediately northeast of White Rock Lake. Mid-century modern, large lots up to 0.5ac. Range $700K–$1.2M+. Same Bryan Adams feeder as Casa Linda but with deeper lake-adjacency and bigger lots. Inventory tight (<15 active typically); strong appreciation. Includes the newer Wyrick Estates / Eastwood Estates pockets.
 
 ### Tier B — Top of band buys
 
@@ -152,14 +153,17 @@ Watch but don't lead with these.
 Run through this for every listing you tour.
 
 - [ ] **DCAD verify lot size and sqft.** Listings often inflate sqft. Pull the parcel and compare. (DCAD search: https://www.dallascad.org)
-- [ ] **Confirm school zone for the specific address.** Old Lake Highlands and the DISD/RISD boundary in Lake Highlands are address-specific, not neighborhood-specific. Use https://www.risd.org or https://www.dallasisd.org with the actual address.
-- [ ] **If Hollywood Heights or M Streets:** confirm any planned exterior changes are allowed under the conservation district guidelines. The review board can take 6+ weeks.
-- [ ] **Pull last 5 sold within 0.25mi** for a real comp anchor. The Comps tab does this for you per sub-area but a quarter-mile radius matters more for valuation.
-- [ ] **Verify foundation report.** 1940s–1960s East Dallas homes settle. A $30K foundation issue can be invisible at the showing.
-- [ ] **Roof age ≤ 12 years** for insurance. Texas hail = aged roofs are insurability landmines.
-- [ ] **Tax appraisal vs. asking.** Texas non-disclosure means DCAD's appraised value is an imperfect anchor, but a >40% premium over appraised value warrants a "what changed?" conversation.
-- [ ] **In-person at different times.** Drive by at 7am, 5pm, and 9pm before offering. Old East Dallas has noise pockets that don't show up on Zillow.
+- [ ] **Foundation report mandatory.** North Texas has expansive clay soils (50–70% clay) that swell and shrink. 1940s–1970s East Dallas homes commonly have foundation history. Require a structural engineer report (not just a regular inspector). A $30K foundation issue can be invisible at showing.
+- [ ] **Roof age ≤ 12 years.** Dallas hail events nearly doubled 2022–2024; Texas insurance averages ~$4,380/yr (~85% above national). Old roofs are insurability landmines. Impact-resistant Class 4 shingles are a meaningful underwriting plus.
+- [ ] **FEMA flood zone check.** Use FEMA maps or First Street Flood Factor. Anything in the 100-year floodplain dramatically raises insurance and limits renovation options.
+- [ ] **Confirm school zone for the specific address.** Old Lake Highlands has DISD/RISD boundary splits. Casa Linda and Lake Park Estates are Bryan Adams (DISD). Use https://www.risd.org or https://www.dallasisd.org with the actual address.
+- [ ] **If Hollywood Heights or M Streets:** confirm any planned exterior changes are allowed under the conservation district guidelines. Review board can take 6+ weeks.
+- [ ] **Pull last 5 sold within 0.25mi** for a real comp anchor. The Comps tab gives you sub-area level; a quarter-mile radius is what an appraiser will use.
+- [ ] **Tax appraisal vs. asking.** Texas non-disclosure means DCAD's appraised value is an imperfect anchor (often trails market by 10–25% due to caps and protests), but a >40% premium over appraised value warrants a "what changed?" conversation.
+- [ ] **Property tax protest history.** Pull the parcel's protest record. A house that's been successfully protested down has lower carry cost; one that hasn't may have room you can capture.
+- [ ] **Drive-by at 7am, 5pm, and 9pm.** Noise pockets, traffic flow, neighbor parking, ambient activity don't show up on Zillow. Especially important for anything inside one block of Garland Rd, Skillman, Mockingbird, NW Hwy.
 - [ ] **Listing agent owner-motivation question.** "Why is the seller moving and what's their timeline?" Ask in the first call, not the offer.
+- [ ] **ForwardDallas zoning check.** The 2024 ForwardDallas plan allows more "missing middle" housing (duplexes, ADUs) in historically single-family zones. Most established conservation districts are protected, but Tier B/C areas without historic-district status could see density changes. Check the parcel's zoning classification on the city's plan.
 
 ## How to use this tracker
 

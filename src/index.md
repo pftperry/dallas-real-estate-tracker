@@ -9,7 +9,7 @@ import L from "npm:leaflet";
 
 # Watchlist
 
-Active listings ranked by buy-fit score. Score weights are tuned for Lakewood-orbit preference (30%), school quality (15%), price fit (20%), $/sqft vs. area (15%), DOM leverage (10%), vintage (5%), lot size (5%).
+Active listings ranked by buy-fit score. Weights: Lakewood-orbit 30%, price fit 20%, schools 10%, $/sqft vs. peers 10%, DOM leverage 10%, vintage 10%, lot size 10%. Listings on known busy streets are flagged with a ⚠ and lose 5 score points.
 
 ```js
 const watchlist = await FileAttachment("data/watchlist.json").json();
@@ -36,7 +36,7 @@ const ppsfColor = d3.scaleLinear()
 
 ## Top 30 by buy-fit score
 
-Click any address to open the Redfin listing. $/sqft is colored red→gray→green based on percent over/under the sub-area median (hover for the number).
+Click any address to open the Redfin listing. $/sqft is colored red→gray→green based on percent over/under the **size-normalized peer baseline** (same sub-area, ±25% sqft). The ⚠ column flags listings on known Dallas arterials (Garland Rd, Buckner, Skillman, Abrams, Mockingbird, Northwest Hwy, Plano Rd, Walnut Hill, Forest Ln, Greenville Ave, Audelia, Royal Ln).
 
 ```js
 const top = (watchlist.listings || []).slice(0, 30);
@@ -45,11 +45,12 @@ const top = (watchlist.listings || []).slice(0, 30);
 ```js
 Inputs.table(top, {
   columns: [
-    "_score", "sub_area_id", "address", "price_usd", "ppsf_usd",
+    "_score", "_busy_street", "sub_area_id", "address", "price_usd", "ppsf_usd",
     "beds", "baths", "sqft", "lot_size_sqft", "year_built", "days_on_market"
   ],
   header: {
     _score: "Score",
+    _busy_street: "⚠",
     sub_area_id: "Sub-area",
     address: "Address",
     price_usd: "Price",
@@ -63,6 +64,7 @@ Inputs.table(top, {
   },
   format: {
     _score: v => html`<b>${v}</b>`,
+    _busy_street: v => v ? html`<span title="On a known Dallas arterial — likely noise/traffic discount" style="color: #dc2626; font-weight: 700;">⚠</span>` : "",
     sub_area_id: v => areaName.get(v) ?? v ?? "—",
     address: (v, i, data) => {
       const li = data[i];
@@ -74,12 +76,12 @@ Inputs.table(top, {
     ppsf_usd: (v, i, data) => {
       if (!v) return "—";
       const li = data[i];
-      const median = watchlist.area_ppsf_medians?.[li.sub_area_id];
-      if (!median) return `$${v}`;
-      const diff = (v - median) / median;
+      const baseline = li._ppsf_baseline ?? watchlist.area_ppsf_medians?.[li.sub_area_id];
+      if (!baseline) return `$${v}`;
+      const diff = (v - baseline) / baseline;
       const pct = (diff * 100).toFixed(0);
       const sign = diff > 0 ? "+" : "";
-      const tip = `${sign}${pct}% vs ${areaName.get(li.sub_area_id) ?? "area"} median ($${median}/sqft)`;
+      const tip = `${sign}${pct}% vs ${li._ppsf_baseline_source || "baseline"} ($${Math.round(baseline)}/sqft)`;
       return html`<span style="color: ${ppsfColor(diff)}; font-weight: 600;" title=${tip}>$${v}</span>`;
     },
     sqft: v => v?.toLocaleString() ?? "—",
@@ -88,6 +90,7 @@ Inputs.table(top, {
   rows: 30,
   width: {
     _score: 60,
+    _busy_street: 30,
     sub_area_id: 160,
     address: 220,
     price_usd: 80,
@@ -193,11 +196,14 @@ Plot.plot({
 | Component | Weight | What it measures |
 |---|---:|---|
 | Lakewood orbit | 30% | How "Lakewood" the sub-area feels (1.0 = Lakewood-side, 0.3 = deep LH) |
-| Schools | 15% | Feeder pattern quality (Woodrow > RISD pockets > Bryan Adams) |
 | Price fit | 20% | Inside buy box = full credit; over $1.1M = linear penalty |
-| $/sqft vs. area | 15% | Bonus for buying ≤ area median; penalty for paying > 1.2x median |
+| Schools | 10% | Feeder pattern quality (Woodrow > RISD pockets > Bryan Adams) |
+| $/sqft vs. peers | 10% | **Size-normalized**: compares to sold comps in same sub-area within ±25% sqft. Falls back to area median if peer set <3. |
 | DOM leverage | 10% | Longer-on-market = more negotiation room |
-| Vintage | 5% | Newer build = more turnkey |
-| Lot size | 5% | Bigger lots win ties |
+| Vintage | 10% | Newer build = more turnkey, less maintenance |
+| Lot size | 10% | Bigger lots — meaningful in Dallas where lot premiums diverge sharply |
+| Busy-street flag | -5pt | Soft penalty for addresses on Garland Rd, Buckner, Skillman, Abrams, Mockingbird, NW Hwy, Plano Rd, Walnut Hill, Forest Ln, Greenville Ave, Audelia, Royal Ln |
+
+**Why size-normalized $/sqft?** Larger homes price at lower $/sqft as a baseline (fixed costs spread across more sqft). The previous "vs. area median" rule fired on every 4,000 sqft listing in a 2,000-sqft-typical neighborhood, generating false-positive "hidden value" flags. The peer-comp rule now compares apples to apples.
 
 Tweak weights in `pipeline/score.py` and rerun `python -m pipeline.score`.
