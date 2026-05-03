@@ -117,18 +117,17 @@ display(ceiling.length
 
 ## Tactical playbook by tier
 
-### Tier S — Lakewood-orbit prime focus
+### Tier S — Lakewood-orbit + Mockingbird/Lakewood Elementary feeders
 
-Spend the most time here. These are the closest thing to "Lakewood proper" that fit the buy box.
+Spend the most time here. Tier S now also includes any sub-area feeding **Mockingbird Elementary**, DISD's other top-tier elementary alongside Lakewood Elem. School anchor + Woodrow Wilson HS resale defense is strong enough to override the "not Lakewood feel" knock on M Streets.
 
-- **Forest Hills (75218)** &mdash; Look for: 2,000–2,800 sqft homes with 8K+ lots between Garland Rd and Edmondson Ave, west of Buckner. Skip: anything backing Garland Rd or Buckner (busy-street flag in the watchlist). Note: Redfin tags newer northern subdivisions (Wyrick Estates, Lake Park) as "Forest Hills" — those are now bucketed under Lake Park Estates here. Median ~$759K (12mo); $1.1M buys the top quartile. Slowing market (48 DOM) = ask for terms (closing credit, repair credit) before discount.
-- **Hollywood Heights / Santa Monica** &mdash; Look for: Tudor or Craftsman with original details. Skip: anything where exterior was recently changed without permits (conservation district = clawback risk). 47% YoY $/sqft pop is a yellow flag — verify with at least 3 same-block comps before paying ask.
+- **Forest Hills (75218)** &mdash; Look for: 2,000–2,800 sqft homes with 8K+ lots between Garland Rd and Edmondson Ave, west of Buckner. Skip: anything backing Garland Rd or Buckner (busy-street flag in the watchlist). Note: Redfin tags newer northern subdivisions (Wyrick Estates, Lake Park) as "Forest Hills" — those are now bucketed under Lake Park Estates here. Median ~$759K (12mo); $1.1M buys the top quartile. Slowing market (48 DOM) = ask for terms (closing credit, repair credit) before discount. **Lakewood Elementary feeder.**
+- **Hollywood Heights / Santa Monica** &mdash; Look for: Tudor or Craftsman with original details. Skip: anything where exterior was recently changed without permits (conservation district = clawback risk). 47% YoY $/sqft pop is a yellow flag — verify with at least 3 same-block comps before paying ask. **Lakewood Elementary feeder.**
+- **M Streets / Greenland Hills** &mdash; Look for: Mercedes, Monticello, Martel — the quietest streets. Walkable to Greenville Ave (Walk Score ~75). Skip: anything backing 75 / Knox-Henderson. Conservation district. **Mockingbird Elementary feeder = top-tier school anchor**, even though the "feel" is more urban/walkable than lake-centric. Median $865K means $1.1M buys above-median product — expect competition.
 
 ### Tier A — RISD optionality + lake-adjacent value plays
 
 Watch closely. Pull the trigger if a strong listing appears.
-
-- **M Streets / Greenland Hills** *(demoted from S to A per critical review)* &mdash; Look for: Mercedes, Monticello, Martel — the quietest streets. Walkable to Greenville Ave (Walk Score ~75). Skip: anything backing 75 / Knox-Henderson. Conservation district. The "demotion" reasoning: walkable/urban character is meaningfully different from the lake-centric Lakewood vibe. Still a strong area, just not "Lakewood-orbit" in spirit.
 - **Moss Farm** &mdash; +26% YoY momentum is real but watch for thin-sample bias. Verify against the dispersion ranking before paying ask. Smaller sub-area (~30 homes), inventory turns over slowly.
 - **Merriman Park Estates** &mdash; 22 DOM = competitive. Don't try to negotiate hard on a fresh listing; either commit fast or pass. Best for renovated mid-century ranches; new construction here is rare.
 - **Casa Linda** &mdash; The undervalued pick. Bryan Adams feeder is the school weakness, but for a 5+ year hold before kindergarten, you're getting Lakewood-orbit walking distance to White Rock Lake at $700K median. Niche #11 in Dallas. If you find a renovated 2,500+ sqft here at $850–950K, that's a genuinely good trade.
