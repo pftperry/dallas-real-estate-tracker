@@ -77,6 +77,21 @@ SOLD_WITHIN_DAYS = 180
 DEFAULT_MIN_PRICE = 600_000
 DEFAULT_MAX_PRICE = 1_300_000
 
+# Catches multi-unit properties that Redfin sometimes mis-classifies as
+# "Single Family Residential" but are really condos, townhomes, fourplexes
+# sold as a single investment, or attached units. Triggered by a unit-number
+# suffix in the address (e.g., "5102 Mission Ave #5102", "712 Rainwater Rd #7").
+import re as _re
+# Two cases: '#' followed by an identifier, OR a unit-type word (apt, unit,
+# ste, suite, bldg, building) followed by whitespace then an identifier. The
+# whitespace requirement after the word avoids matching street names like
+# "Sterling" (would match "Ste" + "rling" without it).
+UNIT_SUFFIX_RE = _re.compile(
+    r"\s+(?:#\s*[A-Za-z0-9\-]+"
+    r"|(?:apt|apartment|unit|ste|suite|bldg|building)\.?\s+[A-Za-z0-9\-]+)\b",
+    _re.IGNORECASE,
+)
+
 
 def fetch_bbox(
     bbox,
@@ -205,6 +220,12 @@ def main() -> int:
             ptype = (norm.get("property_type") or "").lower()
             if "single family" not in ptype:
                 LOG.debug("Skipping non-SFR: %s (%s)", norm["address"], norm.get("property_type"))
+                continue
+            # Address-level filter: even when Redfin tags as SFR, a unit-number
+            # suffix is a strong signal it's actually a multi-unit property
+            # (apartment building sold as one, condo, attached unit).
+            if UNIT_SUFFIX_RE.search(norm["address"]):
+                LOG.debug("Skipping unit-suffixed address: %s", norm["address"])
                 continue
             key = f"{norm['address']}|{norm['zip']}"
             if key not in seen or norm.get("sub_area_id") == area.id:
