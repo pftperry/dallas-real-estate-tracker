@@ -4,7 +4,6 @@ title: Comps explorer
 
 ```js
 import L from "npm:leaflet";
-import "npm:leaflet/dist/leaflet.css";
 ```
 
 # Comps explorer
@@ -104,6 +103,12 @@ const mapDiv = display(html`<div style="height: 480px; border-radius: 4px; borde
 }
 ```
 
+> **Key takeaways**
+>
+> - Color shows $/sqft *within* the current filter set. Red = high $/sqft, green = low. Use the filters above the map to narrow.
+> - Marker clusters in your target sub-areas anchor your sense of market price. Click any marker for the Redfin sold page.
+> - Dashed gray rectangles = sub-area bounding boxes; reference points only, not pixel-perfect.
+
 ## Price vs. sqft
 
 ```js
@@ -123,6 +128,12 @@ Plot.plot({
   height: 380
 })
 ```
+
+> **Key takeaways**
+>
+> - Each dot = one recent sale. The cloud shape reveals the local price-size relationship.
+> - Gaps in the cloud are price/size combos the market doesn't trade. If your target falls in a gap, comps will be thin and pricing harder to defend.
+> - Sub-area color helps spot which areas trade at higher $/sqft for the same physical size — that's the location premium made visible.
 
 ## Comps table
 
@@ -160,3 +171,9 @@ Inputs.table(filtered, {
   rows: 50
 })
 ```
+
+> **Key takeaways**
+>
+> - Click any address for the Redfin sold page (full photos, listing history, last sale).
+> - Sort by $/sqft to surface anomalies in either direction — both ends of the distribution deserve a closer look.
+> - Cross-reference Sold date for recency. A $300/sqft comp from 6 months ago is less anchorable than one from last month, especially in a rate-sensitive market.

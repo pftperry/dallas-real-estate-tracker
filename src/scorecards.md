@@ -50,6 +50,13 @@ Plot.plot({
 })
 ```
 
+> **Key takeaways**
+>
+> - Dots inside the green rectangle = transactions that closed in your $800K–$1.1M, 1,200–4,000 sqft buy-box space. (Note: scoring filters listings to 2,000+ sqft; this chart still shows smaller sales for market context.)
+> - Areas with dense clusters *inside* the rectangle have liquidity at your price point — easy comps, defensible resale.
+> - Empty space inside the rectangle = no recent comps; either you're early to that area, or that price/size combo just doesn't transact there.
+> - Dots far above the rectangle = areas already priced beyond turnkey reach at your band.
+
 ## Buy-box capture rate (last 6mo)
 
 Share of recent sales that closed *inside* your $${(buyBox.price_min_usd/1000).toFixed(0)}K–$${(buyBox.price_max_usd/1000).toFixed(0)}K band. Higher = more buyer activity at your price point = more comps to anchor on, and faster signal when something prices wrong.
@@ -107,6 +114,12 @@ Plot.plot({
 })
 ```
 
+> **Key takeaways**
+>
+> - High capture rate (60%+) = the area's natural price band overlaps yours. More comps, easier resale, but also more competition on each listing.
+> - Low capture rate (<20%) = you'd be near the top of the local market. Resale buyer pool is thinner; price defense in a downturn is weaker.
+> - Cross-reference with the Lakewood-orbit weight: high orbit + high capture = sweet spot; high orbit + low capture = stretching.
+
 ## $/sqft distribution by sub-area (last 6mo sold)
 
 Boxes show the IQR — wider = more dispersion = more mispricing opportunities. The line in the middle is the median. Outliers as dots.
@@ -130,6 +143,12 @@ Plot.plot({
   ]
 })
 ```
+
+> **Key takeaways**
+>
+> - **Wide boxes (long IQR) = pricing dispersion = mispricing room.** Anomalies live there. Best fishing for over- or under-priced listings.
+> - Tight boxes = efficient market. Less negotiation room; list price is close to clearing price.
+> - Outlier dots beyond the whiskers are extreme prints — investigate before treating them as comps; they could be condition outliers, lot-size outliers, or new construction.
 
 ## Days-on-market distribution (active inventory)
 
@@ -161,6 +180,12 @@ Plot.plot({
 })
 ```
 
+> **Key takeaways**
+>
+> - Dots far right (>60 days) = stale listings. Open at 5–8% below ask if condition supports it.
+> - Clusters near zero = competitive market — speed-to-offer matters more than negotiation.
+> - Mixed distribution within an area = uneven inventory; selectively hunt the slow listings while ignoring the fresh ones.
+
 ## YoY appreciation (config snapshot)
 
 Trailing-12mo appreciation per area, from the config. Use as directional reference rather than precise truth — small areas can swing on 2-3 closings.
@@ -189,6 +214,12 @@ Plot.plot({
   ]
 })
 ```
+
+> **Key takeaways**
+>
+> - Directional only — small areas swing on 2–3 closings. Don't size up bids based on a single area's YoY in isolation.
+> - Cross-reference with broader Dallas trend (~4% expected for 2026) to spot relative outperformers vs. underperformers.
+> - Consistently high YoY plus high capture rate = momentum + liquidity = strong buy signal. High YoY plus low capture rate = thin market that just had a couple high prints; treat with skepticism.
 
 ## Sortable scorecard
 

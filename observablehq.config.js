@@ -16,6 +16,8 @@ export default {
   theme: ["air", "near-midnight"],
   header: "Lakewood &middot; Lake Highlands",
   footer: "Personal tracker. Data: Redfin + DCAD. Refreshed daily.",
+  // Leaflet CSS loaded globally to avoid per-page npm: import conflict.
+  head: `<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin />`,
   output: "dist",
   root: "src",
   base,

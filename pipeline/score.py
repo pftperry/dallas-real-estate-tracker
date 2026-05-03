@@ -38,13 +38,18 @@ WEIGHTS = {
 }
 
 
-def load_active_listings() -> list[dict]:
+def load_active_listings(sqft_min: int = 0) -> list[dict]:
     path = DATA_ROOT / "listings" / "latest_redfin.json"
     if not path.exists():
         LOG.warning("No active listings snapshot at %s", path)
         return []
     payload = json.loads(path.read_text())
-    return payload.get("listings", [])
+    listings = payload.get("listings", [])
+    if sqft_min:
+        before = len(listings)
+        listings = [li for li in listings if (li.get("sqft") or 0) >= sqft_min]
+        LOG.info("Filtered <%d sqft: %d -> %d listings", sqft_min, before, len(listings))
+    return listings
 
 
 def compute_area_medians(listings: list[dict]) -> dict[str, float]:
@@ -149,8 +154,9 @@ def main() -> int:
 
     areas = load_sub_areas(include_watch=True)  # noqa: F841 (load to validate config)
 
-    listings = load_active_listings()
-    LOG.info("Scoring %d listings", len(listings))
+    sqft_min = int(buy_box.get("sqft_min") or 0)
+    listings = load_active_listings(sqft_min=sqft_min)
+    LOG.info("Scoring %d listings (sqft_min=%d)", len(listings), sqft_min)
     if not listings:
         write_snapshot("stats", "watchlist", {
             "as_of": utc_now_iso(),

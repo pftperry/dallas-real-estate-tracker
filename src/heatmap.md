@@ -4,7 +4,6 @@ title: Map
 
 ```js
 import L from "npm:leaflet";
-import "npm:leaflet/dist/leaflet.css";
 ```
 
 # Map
@@ -94,6 +93,12 @@ const mapDiv = display(html`<div style="height: 640px; border-radius: 4px; borde
 }
 ```
 
+> **Key takeaways**
+>
+> - Color shows $/sqft: red = high, green = low. Clusters of red surrounded by green = area heating up at the high end.
+> - Isolated green markers in an otherwise hot area = potential undervalue. Pull the listing and check condition before assuming it's a deal.
+> - Dashed gray rectangles = sub-area bounding boxes for orientation. Approximate.
+
 ## Dispersion ranking
 
 Areas with the widest IQR (75th — 25th $/sqft) are where pricing is least efficient — and where you can find anomalies on either side.
@@ -120,3 +125,9 @@ Inputs.table(stats.map(s => ({
   IQR: s.iqr ? `$${Math.round(s.iqr)}` : "—"
 })))
 ```
+
+> **Key takeaways**
+>
+> - **Highest IQR rows = best fishing ground for mispriced listings.** Wide spread means anomalies in both directions.
+> - Lowest IQR = efficient market — list price is close to clearing price, less room to negotiate.
+> - The optimal hunting area is high IQR plus your tier preference: pricing dispersion in a sub-area you actually want to live in.

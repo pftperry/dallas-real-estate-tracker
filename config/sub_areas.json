@@ -3,9 +3,10 @@
   "buy_box": {
     "price_min_usd": 800000,
     "price_max_usd": 1100000,
+    "sqft_min": 2000,
     "condition": "turnkey",
     "school_horizon_years": 5,
-    "preference_notes": "Strong Lakewood-orbit preference. Schools moderate weight (5-6yr horizon)."
+    "preference_notes": "Strong Lakewood-orbit preference. Schools moderate weight (5-6yr horizon). Min 2,000 sqft (no smaller homes)."
   },
   "sub_areas": [
     {

@@ -5,7 +5,6 @@ toc: false
 
 ```js
 import L from "npm:leaflet";
-import "npm:leaflet/dist/leaflet.css";
 ```
 
 # Watchlist
@@ -103,6 +102,12 @@ Inputs.table(top, {
 })
 ```
 
+> **Key takeaways**
+>
+> - All listings shown are at least 2,000 sqft (your buy-box floor).
+> - Click any address for the Redfin listing. Sort by Score for best overall fit, or click any column header to re-sort.
+> - $/sqft cell color is relative to the sub-area median: green = ≥10% under, gray = at, red = ≥10% over. Hover the value to see the exact percent and the median anchor.
+
 ## Map of active listings
 
 Markers are color-graded by buy-fit score (green = best fit). Click for address, price, and a Redfin link.
@@ -156,6 +161,13 @@ const mapDiv = display(html`<div style="height: 480px; border-radius: 4px; borde
 }
 ```
 
+> **Key takeaways**
+>
+> - Marker color and size scale with buy-fit score: green = best fit, red = worst.
+> - Heavy clusters of green markers in Tier S sub-areas (Forest Hills, Hollywood Heights, M Streets) are where to focus tours.
+> - Isolated green markers in Tier B/C areas are anomalies — investigate why they score so well; sometimes a hidden gem, sometimes a data quirk worth verifying.
+> - Dashed gray rectangles are sub-area bounding boxes. Approximate.
+
 ## Score distribution
 
 ```js
@@ -169,6 +181,12 @@ Plot.plot({
   height: 200
 })
 ```
+
+> **Key takeaways**
+>
+> - Right-skewed shape (long right tail) = several high-fit options exist this week. Act on those first.
+> - Left-skewed or flat = no compelling matches. Wait for new inventory or relax the buy box.
+> - Median position tells you whether the screen is rich or poor right now overall.
 
 ## How the score works
 
