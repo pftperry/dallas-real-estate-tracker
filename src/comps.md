@@ -7,8 +7,8 @@ title: Comps explorer
 Recently sold homes filtered to the screen. Use this to sanity-check what your buy-box actually buys.
 
 ```js
-const sold = await FileAttachment("../data/sold/latest_redfin.json").json().catch(() => ({listings: []}));
-const config = await FileAttachment("../config/sub_areas.json").json();
+const sold = await FileAttachment("data/sold.json").json();
+const config = await FileAttachment("data/sub_areas.json").json();
 ```
 
 ```js

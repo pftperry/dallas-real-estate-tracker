@@ -7,8 +7,8 @@ title: Sub-area scorecards
 Ten primary sub-areas plus three on the watch list. Sortable by any column.
 
 ```js
-const card = await FileAttachment("../data/stats/latest_scorecards.json").json().catch(() => ({scorecards: []}));
-const config = await FileAttachment("../config/sub_areas.json").json();
+const card = await FileAttachment("data/scorecards.json").json();
+const config = await FileAttachment("data/sub_areas.json").json();
 ```
 
 ```js

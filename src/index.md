@@ -8,8 +8,8 @@ toc: false
 Active listings ranked by buy-fit score. Score weights are tuned for Lakewood-orbit preference (30%), school quality (15%), price fit (20%), $/sqft vs. area (15%), DOM leverage (10%), vintage (5%), lot size (5%).
 
 ```js
-const watchlist = await FileAttachment("../data/stats/latest_watchlist.json").json().catch(() => ({listings: [], as_of: null, n: 0}));
-const subAreas = await FileAttachment("../config/sub_areas.json").json();
+const watchlist = await FileAttachment("data/watchlist.json").json();
+const subAreas = await FileAttachment("data/sub_areas.json").json();
 ```
 
 ```js
