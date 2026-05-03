@@ -73,7 +73,19 @@ jobs:
             exit 0
           fi
           git commit -m "data: refresh ${{ steps.mode.outputs.mode }} run $(date -u +%Y-%m-%d)"
-          git push
+          # Race-resilient push: if main advanced during the run (e.g., a
+          # manual commit), rebase our data commit on top and retry up to
+          # three times. Avoids the "rejected (fetch first)" failure.
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "push succeeded on attempt $attempt"
+              exit 0
+            fi
+            echo "push rejected on attempt $attempt; pulling --rebase and retrying"
+            git pull --rebase --autostash origin main
+          done
+          echo "push failed after 3 attempts"
+          exit 1
 
   build-and-deploy:
     needs: etl
