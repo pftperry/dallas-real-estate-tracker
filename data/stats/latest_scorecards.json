@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-05-03T22:45:27Z",
+  "as_of": "2026-05-03T22:56:03Z",
   "scorecards": [
     {
       "id": "forest_hills",
@@ -43,10 +43,10 @@
       "config_median_12mo_usd": 749000,
       "config_yoy_pct": 47.2,
       "active": {
-        "n": 9,
-        "median_price_usd": 775000,
-        "median_ppsf_usd": 485,
-        "median_dom_days": 24
+        "n": 8,
+        "median_price_usd": 777500.0,
+        "median_ppsf_usd": 493.0,
+        "median_dom_days": 24.0
       },
       "sold_30d": {
         "n": 0,
@@ -75,10 +75,10 @@
       "config_median_12mo_usd": 865000,
       "config_yoy_pct": -6.9,
       "active": {
-        "n": 9,
-        "median_price_usd": 925000,
-        "median_ppsf_usd": 388,
-        "median_dom_days": 23
+        "n": 6,
+        "median_price_usd": 950000.0,
+        "median_ppsf_usd": 452.5,
+        "median_dom_days": 21.0
       },
       "sold_30d": {
         "n": 0,
@@ -107,10 +107,10 @@
       "config_median_12mo_usd": 700000,
       "config_yoy_pct": null,
       "active": {
-        "n": 20,
-        "median_price_usd": 799900.0,
-        "median_ppsf_usd": 314.0,
-        "median_dom_days": 35.5
+        "n": 19,
+        "median_price_usd": 799900,
+        "median_ppsf_usd": 315,
+        "median_dom_days": 32
       },
       "sold_30d": {
         "n": 0,
@@ -267,10 +267,10 @@
       "config_median_12mo_usd": 579000,
       "config_yoy_pct": 21.1,
       "active": {
-        "n": 15,
-        "median_price_usd": 865000,
+        "n": 14,
+        "median_price_usd": 867495.0,
         "median_ppsf_usd": 290.0,
-        "median_dom_days": 42
+        "median_dom_days": 42.0
       },
       "sold_30d": {
         "n": 0,
@@ -427,10 +427,10 @@
       "config_median_12mo_usd": 1200000,
       "config_yoy_pct": null,
       "active": {
-        "n": 5,
-        "median_price_usd": 799900,
-        "median_ppsf_usd": 311,
-        "median_dom_days": 25
+        "n": 3,
+        "median_price_usd": 1189000,
+        "median_ppsf_usd": 456,
+        "median_dom_days": 18
       },
       "sold_30d": {
         "n": 0,
