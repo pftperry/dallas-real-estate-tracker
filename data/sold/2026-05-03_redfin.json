@@ -1,0 +1,11 @@
+{
+  "as_of": "2026-05-03T21:26:58Z",
+  "source": "Redfin gis-csv",
+  "status": "sold",
+  "filters": {
+    "min_price": 600000,
+    "max_price": 1300000
+  },
+  "n_listings": 0,
+  "listings": []
+}
