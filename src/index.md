@@ -33,19 +33,44 @@ const top = (watchlist.listings || []).slice(0, 30);
 ```
 
 ```js
+// Red (overpaying) -> gray (at area median) -> green (under-priced).
+// Domain is +/- 25% relative to the sub-area median; clamps at the edges.
+const ppsfColor = d3.scaleLinear()
+  .domain([-0.25, 0, 0.25])
+  .range(["#16a34a", "#737373", "#dc2626"])
+  .clamp(true);
+
+function addressCell(li) {
+  return li.url
+    ? html`<a href="${li.url}" target="_blank" rel="noopener">${li.address}</a>`
+    : li.address;
+}
+
+function ppsfCell(li) {
+  if (!li.ppsf_usd) return "—";
+  const median = watchlist.area_ppsf_medians?.[li.sub_area_id];
+  if (!median) return html`$${li.ppsf_usd}`;
+  const diff = (li.ppsf_usd - median) / median;
+  const pct = (diff * 100).toFixed(0);
+  const sign = diff > 0 ? "+" : "";
+  const tip = `${sign}${pct}% vs ${areaName.get(li.sub_area_id) ?? "area"} median ($${median}/sqft)`;
+  return html`<span style="color: ${ppsfColor(diff)}; font-weight: 600;" title=${tip}>$${li.ppsf_usd}</span>`;
+}
+```
+
+```js
 Inputs.table(top.map(li => ({
   Score: li._score,
   Sub_area: areaName.get(li.sub_area_id) ?? li.sub_area_id ?? "—",
-  Address: li.address,
+  Address: addressCell(li),
   Price: li.price_usd ? `$${(li.price_usd/1000).toFixed(0)}k` : "—",
-  PPSF: li.ppsf_usd ? `$${li.ppsf_usd}` : "—",
+  PPSF: ppsfCell(li),
   Beds: li.beds,
   Baths: li.baths,
   Sqft: li.sqft?.toLocaleString(),
   Lot: li.lot_size_sqft?.toLocaleString(),
   Year: li.year_built,
-  DOM: li.days_on_market,
-  Link: html`<a href="${li.url}" target="_blank">view</a>`
+  DOM: li.days_on_market
 })), {
   rows: 30,
   format: { Score: x => html`<b>${x}</b>` }
