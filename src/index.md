@@ -64,7 +64,19 @@ Inputs.table(top, {
   },
   format: {
     _score: v => html`<b>${v}</b>`,
-    _busy_street: v => v ? html`<span title="On a known Dallas arterial — likely noise/traffic discount" style="color: #dc2626; font-weight: 700;">⚠</span>` : "",
+    _busy_street: (v, i, data) => {
+      if (!v) return "";
+      const li = data[i];
+      const arterial = li._nearest_arterial;
+      const dist = li._nearest_arterial_m;
+      const onAddr = li._busy_address_on;
+      const proximity = li._busy_proximity;
+      const reason = onAddr
+        ? `On ${arterial ?? "a busy street"}`
+        : `Backs up to / near ${arterial} (~${dist}m from centerline)`;
+      const tip = `${reason} — likely noise/traffic discount`;
+      return html`<span title=${tip} style="color: #dc2626; font-weight: 700;">⚠</span>`;
+    },
     sub_area_id: v => areaName.get(v) ?? v ?? "—",
     address: (v, i, data) => {
       const li = data[i];

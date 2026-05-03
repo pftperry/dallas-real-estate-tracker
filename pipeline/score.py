@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
 import statistics
 import sys
@@ -48,9 +49,8 @@ WEIGHTS = {
 PEER_SQFT_WINDOW = 0.25  # +/- 25%
 PEER_MIN_COUNT = 3       # need at least 3 peers; otherwise fall back to area median
 
-# Dallas arterial / busy-street name patterns. Used to flag listings whose
-# street address contains an arterial name (catches "ON" busy streets, not
-# "BACKS UP TO" — that needs spatial analysis we don't have yet).
+# Dallas arterial / busy-street name patterns. Used as the cheap "address-on"
+# check for listings whose street name itself is an arterial.
 BUSY_STREET_PATTERNS = [
     r"\bGarland Rd\b",
     r"\bBuckner Blvd\b",
@@ -72,6 +72,112 @@ BUSY_STREET_PATTERNS = [
     r"\bRoyal Ln\b",
 ]
 BUSY_STREET_RE = re.compile("|".join(BUSY_STREET_PATTERNS), re.IGNORECASE)
+
+# Approximate Dallas arterial centerlines as (lat, lng) polylines.
+# Used for proximity flagging -- catches homes that *back up to* an arterial
+# even though the street address is on a quiet residential side street.
+# Coordinates are eyeballed from cross-street intersections; threshold is
+# generous (100m) so meter-level inaccuracy does not bite. Refine with OSM
+# extracts when a tighter threshold matters.
+ARTERIALS: dict[str, list[tuple[float, float]]] = {
+    "Garland Rd": [
+        (32.811, -96.770), (32.825, -96.755), (32.835, -96.738),
+        (32.840, -96.715), (32.841, -96.700), (32.853, -96.685),
+    ],
+    "Buckner Blvd": [
+        (32.795, -96.700), (32.825, -96.700), (32.852, -96.698),
+        (32.880, -96.690),
+    ],
+    "Skillman St": [
+        (32.815, -96.760), (32.840, -96.760), (32.860, -96.755),
+        (32.885, -96.745), (32.910, -96.735),
+    ],
+    "Abrams Rd": [
+        (32.815, -96.768), (32.840, -96.768), (32.860, -96.768),
+        (32.885, -96.768), (32.910, -96.770),
+    ],
+    "Mockingbird Ln": [
+        (32.836, -96.785), (32.838, -96.770), (32.840, -96.755),
+        (32.842, -96.738), (32.844, -96.720), (32.846, -96.703),
+    ],
+    "Northwest Hwy": [
+        (32.853, -96.785), (32.855, -96.770), (32.857, -96.755),
+        (32.860, -96.738), (32.862, -96.720), (32.860, -96.700),
+    ],
+    "Plano Rd": [
+        (32.840, -96.690), (32.870, -96.688), (32.900, -96.685),
+    ],
+    "Walnut Hill Ln": [
+        (32.879, -96.785), (32.881, -96.770), (32.883, -96.755),
+        (32.885, -96.738), (32.887, -96.720),
+    ],
+    "Forest Ln": [
+        (32.910, -96.785), (32.911, -96.770), (32.912, -96.755),
+        (32.913, -96.738), (32.914, -96.720),
+    ],
+    "Royal Ln": [
+        (32.895, -96.785), (32.896, -96.770), (32.897, -96.755),
+        (32.898, -96.738), (32.899, -96.720),
+    ],
+    "Audelia Rd": [
+        (32.870, -96.722), (32.890, -96.722), (32.910, -96.722),
+    ],
+    "I-635 (LBJ Fwy)": [
+        (32.918, -96.785), (32.918, -96.755), (32.918, -96.720),
+        (32.918, -96.685),
+    ],
+}
+
+# Distance threshold (meters) below which a listing is considered "backing
+# up to" a busy street. 100m ~= one standard residential lot depth + a
+# margin for coordinate inaccuracy.
+BUSY_PROXIMITY_M = 100.0
+
+
+def _haversine_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    R = 6_371_000.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lng2 - lng1)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return R * 2 * math.asin(math.sqrt(a))
+
+
+def _point_to_segment_m(plat: float, plng: float,
+                        alat: float, alng: float,
+                        blat: float, blng: float) -> float:
+    """Approximate point-to-line-segment distance in meters using equirect projection."""
+    cos_lat = math.cos(math.radians((alat + blat) / 2))
+    px, py = plng * cos_lat, plat
+    ax, ay = alng * cos_lat, alat
+    bx, by = blng * cos_lat, blat
+    dx, dy = bx - ax, by - ay
+    seg_sq = dx * dx + dy * dy
+    if seg_sq == 0:
+        return _haversine_m(plat, plng, alat, alng)
+    t = ((px - ax) * dx + (py - ay) * dy) / seg_sq
+    t = max(0.0, min(1.0, t))
+    cx, cy = ax + t * dx, ay + t * dy
+    # Convert closest point back to lat/lng for haversine
+    return _haversine_m(plat, plng, cy, cx / cos_lat)
+
+
+def nearest_arterial(lat: float | None, lng: float | None) -> tuple[str | None, float]:
+    """Return (arterial_name, distance_meters) for the nearest arterial,
+    or (None, inf) if lat/lng missing."""
+    if lat is None or lng is None:
+        return None, float("inf")
+    best_name, best_d = None, float("inf")
+    for name, waypoints in ARTERIALS.items():
+        for i in range(len(waypoints) - 1):
+            d = _point_to_segment_m(
+                lat, lng,
+                waypoints[i][0], waypoints[i][1],
+                waypoints[i + 1][0], waypoints[i + 1][1],
+            )
+            if d < best_d:
+                best_d, best_name = d, name
+    return best_name, best_d
 
 
 def load_active_listings(sqft_min: int = 0) -> list[dict]:
@@ -131,10 +237,29 @@ def peer_ppsf_median(li: dict, sold_pool: list[dict], area_median: float | None)
     return area_median, "area_median (peer set too small)"
 
 
-def is_busy_street(address: str | None) -> bool:
+def is_busy_street_address(address: str | None) -> bool:
+    """Cheap check: does the street name itself match a known arterial?"""
     if not address:
         return False
     return bool(BUSY_STREET_RE.search(address))
+
+
+def busy_street_assessment(li: dict) -> dict:
+    """Return a dict describing busy-street exposure for one listing.
+
+    Combines the address-on check and the proximity-to-centerline check.
+    Either signal triggers the busy_street flag.
+    """
+    addr_match = is_busy_street_address(li.get("address"))
+    nearest_name, nearest_d = nearest_arterial(li.get("lat"), li.get("lng"))
+    proximity_match = nearest_d <= BUSY_PROXIMITY_M
+    return {
+        "busy_street": addr_match or proximity_match,
+        "busy_address_on": addr_match,
+        "busy_proximity": proximity_match,
+        "nearest_arterial": nearest_name if nearest_d < 500 else None,
+        "nearest_arterial_m": round(nearest_d) if nearest_d < 1_000_000 else None,
+    }
 
 
 def score_listing(
@@ -211,13 +336,18 @@ def score_listing(
         + WEIGHTS["vintage"] * vintage
         + WEIGHTS["lot_size"] * lot_size
     )
-    busy = is_busy_street(li.get("address"))
-    # Soft penalty for busy-street addresses (not a hard cut).
-    if busy:
+    busy = busy_street_assessment(li)
+    # Soft penalty for busy-street exposure (address OR proximity to arterial).
+    # Not a hard cut so a great listing in every other dimension can still rank.
+    if busy["busy_street"]:
         raw -= 0.05  # 5-point hit
     return {
         "score": round(max(0.0, raw) * 100, 1),
-        "busy_street": busy,
+        "busy_street": busy["busy_street"],
+        "busy_address_on": busy["busy_address_on"],
+        "busy_proximity": busy["busy_proximity"],
+        "nearest_arterial": busy["nearest_arterial"],
+        "nearest_arterial_m": busy["nearest_arterial_m"],
         "ppsf_baseline": ppsf_baseline,
         "ppsf_baseline_source": ppsf_baseline_source,
         "components": {
@@ -273,6 +403,10 @@ def main() -> int:
             "_score": result["score"],
             "_components": result["components"],
             "_busy_street": result["busy_street"],
+            "_busy_address_on": result["busy_address_on"],
+            "_busy_proximity": result["busy_proximity"],
+            "_nearest_arterial": result["nearest_arterial"],
+            "_nearest_arterial_m": result["nearest_arterial_m"],
             "_ppsf_baseline": result["ppsf_baseline"],
             "_ppsf_baseline_source": result["ppsf_baseline_source"],
         })
