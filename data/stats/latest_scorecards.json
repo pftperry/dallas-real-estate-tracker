@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-05-03T22:56:03Z",
+  "as_of": "2026-05-03T23:05:36Z",
   "scorecards": [
     {
       "id": "forest_hills",
@@ -68,10 +68,10 @@
     {
       "id": "m_streets",
       "name": "M Streets / Greenland Hills",
-      "tier": "A",
-      "lakewood_orbit": 0.85,
+      "tier": "S",
+      "lakewood_orbit": 0.9,
       "school_district": "DISD",
-      "school_quality_score": 9,
+      "school_quality_score": 10,
       "config_median_12mo_usd": 865000,
       "config_yoy_pct": -6.9,
       "active": {
@@ -79,6 +79,38 @@
         "median_price_usd": 950000.0,
         "median_ppsf_usd": 452.5,
         "median_dom_days": 21.0
+      },
+      "sold_30d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "sold_90d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "sold_365d": {
+        "n": 0,
+        "median_price_usd": null,
+        "median_ppsf_usd": null
+      },
+      "turnover_proxy": 0.0
+    },
+    {
+      "id": "caruth_terrace",
+      "name": "Caruth Terrace",
+      "tier": "S",
+      "lakewood_orbit": 0.85,
+      "school_district": "DISD",
+      "school_quality_score": 10,
+      "config_median_12mo_usd": 653750,
+      "config_yoy_pct": 36.2,
+      "active": {
+        "n": 2,
+        "median_price_usd": 877450.0,
+        "median_ppsf_usd": 379.0,
+        "median_dom_days": 37.5
       },
       "sold_30d": {
         "n": 0,
@@ -395,9 +427,9 @@
       "config_median_12mo_usd": 662000,
       "config_yoy_pct": -22.1,
       "active": {
-        "n": 4,
-        "median_price_usd": 884900.0,
-        "median_ppsf_usd": 402.5,
+        "n": 2,
+        "median_price_usd": 989950.0,
+        "median_ppsf_usd": 416.5,
         "median_dom_days": 7.0
       },
       "sold_30d": {
