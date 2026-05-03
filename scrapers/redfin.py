@@ -78,19 +78,29 @@ def fetch_bbox(
     max_price: int,
     rate: RateLimiter,
 ) -> list[dict]:
-    """Hit the Redfin gis-csv endpoint for one bbox and return parsed rows."""
+    """Hit the Redfin gis-csv endpoint for one bbox and return parsed rows.
+
+    Redfin's gis-csv endpoint requires a closed polygon via `poly=`, not the
+    `min_lat/max_lat/min_lng/max_lng` form. Polygon points are "lng lat" order,
+    comma-separated, with the final point repeating the first to close the loop.
+    """
+    poly = (
+        f"{bbox.sw_lng} {bbox.sw_lat},"     # SW
+        f"{bbox.ne_lng} {bbox.sw_lat},"     # SE
+        f"{bbox.ne_lng} {bbox.ne_lat},"     # NE
+        f"{bbox.sw_lng} {bbox.ne_lat},"     # NW
+        f"{bbox.sw_lng} {bbox.sw_lat}"      # close
+    )
     params = {
         "al": "1",
-        "min_lat": f"{bbox.sw_lat}",
-        "max_lat": f"{bbox.ne_lat}",
-        "min_lng": f"{bbox.sw_lng}",
-        "max_lng": f"{bbox.ne_lng}",
+        "market": "dallas",
+        "poly": poly,
         "min_price": str(min_price),
         "max_price": str(max_price),
         "num_homes": "350",
         "ord": "redfin-recommended-asc",
         "page_number": "1",
-        "sf": "1,1,2,3,5,6,7",
+        "sf": "1,2,3,5,6,7",
         "status": STATUS_CODES[status],
         "uipt": "1,2,3,4,5,6,7,8",
         "v": "8",
