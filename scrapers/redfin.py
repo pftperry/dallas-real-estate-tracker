@@ -109,7 +109,7 @@ def fetch_bbox(
         "page_number": "1",
         "sf": SEARCH_FILTERS[status],
         "status": "9",
-        "uipt": "1,2,3,4,5,6,7,8",
+        "uipt": "1",  # 1 = House (single-family only). Excludes townhouse, condo, multi-family.
         "v": "8",
     }
     if status == "sold":
@@ -199,6 +199,12 @@ def main() -> int:
         for row in rows:
             norm = normalize(row, areas)
             if not norm["address"]:
+                continue
+            # Belt-and-suspenders: even with uipt=1 in URL, hard-filter on
+            # property_type to exclude townhouse/condo/multi-family.
+            ptype = (norm.get("property_type") or "").lower()
+            if "single family" not in ptype:
+                LOG.debug("Skipping non-SFR: %s (%s)", norm["address"], norm.get("property_type"))
                 continue
             key = f"{norm['address']}|{norm['zip']}"
             if key not in seen or norm.get("sub_area_id") == area.id:
