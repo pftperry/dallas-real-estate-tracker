@@ -10,7 +10,8 @@
   "dependencies": {
     "@observablehq/framework": "^1.13.0",
     "@observablehq/plot": "^0.6.16",
-    "d3": "^7.9.0"
+    "d3": "^7.9.0",
+    "leaflet": "^1.9.4"
   },
   "engines": {
     "node": ">=20"

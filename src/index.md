@@ -3,6 +3,11 @@ title: Watchlist
 toc: false
 ---
 
+```js
+import L from "npm:leaflet";
+import "npm:leaflet/dist/leaflet.css";
+```
+
 # Watchlist
 
 Active listings ranked by buy-fit score. Score weights are tuned for Lakewood-orbit preference (30%), school quality (15%), price fit (20%), $/sqft vs. area (15%), DOM leverage (10%), vintage (5%), lot size (5%).
@@ -17,6 +22,10 @@ const areaName = new Map([
   ...subAreas.sub_areas.map(a => [a.id, a.name]),
   ...(subAreas.watch_areas || []).map(a => [a.id, a.name])
 ]);
+const ppsfColor = d3.scaleLinear()
+  .domain([-0.25, 0, 0.25])
+  .range(["#16a34a", "#737373", "#dc2626"])
+  .clamp(true);
 ```
 
 <div class="grid grid-cols-4">
@@ -28,53 +37,123 @@ const areaName = new Map([
 
 ## Top 30 by buy-fit score
 
+Click any address to open the Redfin listing. $/sqft is colored red→gray→green based on percent over/under the sub-area median (hover for the number).
+
 ```js
 const top = (watchlist.listings || []).slice(0, 30);
 ```
 
 ```js
-// Red (overpaying) -> gray (at area median) -> green (under-priced).
-// Domain is +/- 25% relative to the sub-area median; clamps at the edges.
-const ppsfColor = d3.scaleLinear()
-  .domain([-0.25, 0, 0.25])
-  .range(["#16a34a", "#737373", "#dc2626"])
-  .clamp(true);
+Inputs.table(top, {
+  columns: [
+    "_score", "sub_area_id", "address", "price_usd", "ppsf_usd",
+    "beds", "baths", "sqft", "lot_size_sqft", "year_built", "days_on_market"
+  ],
+  header: {
+    _score: "Score",
+    sub_area_id: "Sub-area",
+    address: "Address",
+    price_usd: "Price",
+    ppsf_usd: "$/sqft",
+    beds: "Bd",
+    baths: "Ba",
+    sqft: "Sqft",
+    lot_size_sqft: "Lot",
+    year_built: "Yr",
+    days_on_market: "DOM"
+  },
+  format: {
+    _score: v => html`<b>${v}</b>`,
+    sub_area_id: v => areaName.get(v) ?? v ?? "—",
+    address: (v, i, data) => {
+      const li = data[i];
+      return li?.url
+        ? html`<a href="${li.url}" target="_blank" rel="noopener">${v}</a>`
+        : v;
+    },
+    price_usd: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
+    ppsf_usd: (v, i, data) => {
+      if (!v) return "—";
+      const li = data[i];
+      const median = watchlist.area_ppsf_medians?.[li.sub_area_id];
+      if (!median) return `$${v}`;
+      const diff = (v - median) / median;
+      const pct = (diff * 100).toFixed(0);
+      const sign = diff > 0 ? "+" : "";
+      const tip = `${sign}${pct}% vs ${areaName.get(li.sub_area_id) ?? "area"} median ($${median}/sqft)`;
+      return html`<span style="color: ${ppsfColor(diff)}; font-weight: 600;" title=${tip}>$${v}</span>`;
+    },
+    sqft: v => v?.toLocaleString() ?? "—",
+    lot_size_sqft: v => v?.toLocaleString() ?? "—"
+  },
+  rows: 30,
+  width: {
+    _score: 60,
+    sub_area_id: 160,
+    address: 220,
+    price_usd: 80,
+    ppsf_usd: 80,
+    beds: 40,
+    baths: 40,
+    sqft: 80,
+    lot_size_sqft: 80,
+    year_built: 50,
+    days_on_market: 60
+  }
+})
+```
 
-function addressCell(li) {
-  return li.url
-    ? html`<a href="${li.url}" target="_blank" rel="noopener">${li.address}</a>`
-    : li.address;
-}
+## Map of active listings
 
-function ppsfCell(li) {
-  if (!li.ppsf_usd) return "—";
-  const median = watchlist.area_ppsf_medians?.[li.sub_area_id];
-  if (!median) return html`$${li.ppsf_usd}`;
-  const diff = (li.ppsf_usd - median) / median;
-  const pct = (diff * 100).toFixed(0);
-  const sign = diff > 0 ? "+" : "";
-  const tip = `${sign}${pct}% vs ${areaName.get(li.sub_area_id) ?? "area"} median ($${median}/sqft)`;
-  return html`<span style="color: ${ppsfColor(diff)}; font-weight: 600;" title=${tip}>$${li.ppsf_usd}</span>`;
-}
+Markers are color-graded by buy-fit score (green = best fit). Click for address, price, and a Redfin link.
+
+```js
+const mapDiv = display(html`<div style="height: 480px; border-radius: 4px; border: 1px solid var(--theme-foreground-faintest);"></div>`);
 ```
 
 ```js
-Inputs.table(top.map(li => ({
-  Score: li._score,
-  Sub_area: areaName.get(li.sub_area_id) ?? li.sub_area_id ?? "—",
-  Address: addressCell(li),
-  Price: li.price_usd ? `$${(li.price_usd/1000).toFixed(0)}k` : "—",
-  PPSF: ppsfCell(li),
-  Beds: li.beds,
-  Baths: li.baths,
-  Sqft: li.sqft?.toLocaleString(),
-  Lot: li.lot_size_sqft?.toLocaleString(),
-  Year: li.year_built,
-  DOM: li.days_on_market
-})), {
-  rows: 30,
-  format: { Score: x => html`<b>${x}</b>` }
-})
+{
+  const map = L.map(mapDiv, { scrollWheelZoom: true }).setView([32.853, -96.715], 12.3);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19,
+    subdomains: "abcd"
+  }).addTo(map);
+
+  // Subtle sub-area boundary rectangles
+  const allAreas = [...subAreas.sub_areas, ...(subAreas.watch_areas || [])];
+  for (const a of allAreas) {
+    const bb = a.bbox;
+    L.rectangle([[bb.sw_lat, bb.sw_lng], [bb.ne_lat, bb.ne_lng]], {
+      color: "#9ca3af", weight: 1, opacity: 0.45, fill: false, dashArray: "3,4"
+    }).bindTooltip(a.name, { sticky: true }).addTo(map);
+  }
+
+  const scoreColor = d3.scaleLinear()
+    .domain([0, 50, 100])
+    .range(["#dc2626", "#f59e0b", "#16a34a"])
+    .clamp(true);
+
+  for (const li of (watchlist.listings || [])) {
+    if (li.lat == null || li.lng == null) continue;
+    const popup = `
+      <div style="font-size: 12px; line-height: 1.45">
+        <b><a href="${li.url}" target="_blank" rel="noopener">${li.address}</a></b><br>
+        $${(li.price_usd/1000).toFixed(0)}k &nbsp;·&nbsp; ${li.sqft?.toLocaleString() ?? "—"} sqft &nbsp;·&nbsp; $${li.ppsf_usd ?? "—"}/sqft<br>
+        ${li.beds ?? "—"} bd / ${li.baths ?? "—"} ba &nbsp;·&nbsp; built ${li.year_built ?? "—"}<br>
+        DOM: ${li.days_on_market ?? "—"} &nbsp;·&nbsp; ${areaName.get(li.sub_area_id) ?? ""}<br>
+        <b>Score:</b> ${li._score}
+      </div>
+    `;
+    L.circleMarker([li.lat, li.lng], {
+      radius: 6 + (li._score ?? 0) / 25,
+      fillColor: scoreColor(li._score ?? 0),
+      color: "#fff",
+      weight: 1,
+      fillOpacity: 0.85
+    }).bindPopup(popup).addTo(map);
+  }
+}
 ```
 
 ## Score distribution

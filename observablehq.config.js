@@ -7,9 +7,10 @@ export default {
   title: "Dallas Real Estate Tracker",
   pages: [
     { name: "Watchlist", path: "/" },
+    { name: "Strategy", path: "/strategy" },
     { name: "Sub-area scorecards", path: "/scorecards" },
     { name: "Comps explorer", path: "/comps" },
-    { name: "$/sqft heat map", path: "/heatmap" },
+    { name: "Map", path: "/heatmap" },
     { name: "About", path: "/about" }
   ],
   theme: ["air", "near-midnight"],

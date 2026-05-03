@@ -1,10 +1,17 @@
 ---
-title: $/sqft heat map
+title: Map
 ---
 
-# $/sqft heat map
+```js
+import L from "npm:leaflet";
+import "npm:leaflet/dist/leaflet.css";
+```
 
-Where dispersion is highest = best fishing for mispriced listings. Tight clusters mean the market is "efficient" in that area; wide spread means anomalies live there.
+# Map
+
+Every recently sold home plotted on real streets. Markers color-graded by **$/sqft** (red = high, green = low). Sub-area rectangles are dashed gray overlays — your buy-box pockets.
+
+> Where dispersion is highest = best fishing for mispriced listings. Tight clusters mean the market is "efficient" in that area; wide spread means anomalies live there.
 
 ```js
 const sold = await FileAttachment("data/sold.json").json();
@@ -16,36 +23,80 @@ const areaName = new Map([
   ...config.sub_areas.map(a => [a.id, a.name]),
   ...(config.watch_areas || []).map(a => [a.id, a.name])
 ]);
-```
-
-```js
 const points = (sold.listings || []).filter(d => d.lat && d.lng && d.ppsf_usd);
+const ppsfDomain = d3.extent(points, d => d.ppsf_usd);
+const ppsfColor = d3.scaleSequential(d3.interpolateRdYlGn).domain([ppsfDomain[1], ppsfDomain[0]]);
 ```
 
-## Geographic spread
+```js
+const mapDiv = display(html`<div style="height: 640px; border-radius: 4px; border: 1px solid var(--theme-foreground-faintest);"></div>`);
+```
 
 ```js
-Plot.plot({
-  projection: { type: "mercator", domain: { type: "MultiPoint", coordinates: points.map(d => [d.lng, d.lat]) } },
-  color: { type: "linear", scheme: "viridis", legend: true, label: "$/sqft" },
-  marks: [
-    Plot.dot(points, {
-      x: "lng",
-      y: "lat",
-      r: 5,
-      fill: "ppsf_usd",
-      stroke: "white",
-      strokeWidth: 0.4,
-      title: d => `${d.address}\n$${d.ppsf_usd}/sqft\n${areaName.get(d.sub_area_id) ?? ""}`
-    })
-  ],
-  height: 600
-})
+{
+  const map = L.map(mapDiv, { scrollWheelZoom: true }).setView([32.853, -96.715], 12.3);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19,
+    subdomains: "abcd"
+  }).addTo(map);
+
+  // Sub-area overlays
+  const allAreas = [...config.sub_areas, ...(config.watch_areas || [])];
+  for (const a of allAreas) {
+    const bb = a.bbox;
+    L.rectangle([[bb.sw_lat, bb.sw_lng], [bb.ne_lat, bb.ne_lng]], {
+      color: "#6b7280", weight: 1, opacity: 0.5, fill: false, dashArray: "3,4"
+    }).bindTooltip(a.name, { sticky: true }).addTo(map);
+  }
+
+  for (const d of points) {
+    const popup = `
+      <div style="font-size: 12px; line-height: 1.45">
+        <b><a href="${d.url}" target="_blank" rel="noopener">${d.address}</a></b><br>
+        Sold ${d.sold_date}<br>
+        $${(d.price_usd/1000).toFixed(0)}k &nbsp;·&nbsp; ${d.sqft?.toLocaleString() ?? "—"} sqft &nbsp;·&nbsp; <b>$${d.ppsf_usd}/sqft</b><br>
+        ${d.beds ?? "—"} bd / ${d.baths ?? "—"} ba &nbsp;·&nbsp; built ${d.year_built ?? "—"}<br>
+        ${areaName.get(d.sub_area_id) ?? ""}
+      </div>
+    `;
+    L.circleMarker([d.lat, d.lng], {
+      radius: 6,
+      fillColor: ppsfColor(d.ppsf_usd),
+      color: "#1f2937",
+      weight: 0.5,
+      fillOpacity: 0.85
+    }).bindPopup(popup).addTo(map);
+  }
+
+  // Color legend in bottom right
+  const legend = L.control({ position: "bottomright" });
+  legend.onAdd = () => {
+    const div = L.DomUtil.create("div", "info legend");
+    div.style.background = "rgba(255,255,255,0.92)";
+    div.style.padding = "6px 10px";
+    div.style.fontSize = "11px";
+    div.style.lineHeight = "1.5";
+    div.style.borderRadius = "4px";
+    div.style.boxShadow = "0 1px 4px rgba(0,0,0,0.15)";
+    const grades = [
+      Math.round(ppsfDomain[0]),
+      Math.round((ppsfDomain[0] + ppsfDomain[1]) / 2),
+      Math.round(ppsfDomain[1])
+    ];
+    div.innerHTML = `
+      <b>$/sqft</b><br>
+      ${grades.map(v => `<span style="display:inline-block;width:10px;height:10px;background:${ppsfColor(v)};margin-right:4px;border-radius:50%"></span>$${v}`).join("<br>")}
+    `;
+    return div;
+  };
+  legend.addTo(map);
+}
 ```
 
 ## Dispersion ranking
 
-Areas with the highest $/sqft variance are where you should hunt.
+Areas with the widest IQR (75th — 25th $/sqft) are where pricing is least efficient — and where you can find anomalies on either side.
 
 ```js
 const byArea = d3.group(points, d => d.sub_area_id);
@@ -68,18 +119,4 @@ Inputs.table(stats.map(s => ({
   P75: s.p75 ? `$${Math.round(s.p75)}` : "—",
   IQR: s.iqr ? `$${Math.round(s.iqr)}` : "—"
 })))
-```
-
-## Box plot per area
-
-```js
-Plot.plot({
-  marginLeft: 180,
-  x: { label: "$/sqft", grid: true },
-  y: { label: null },
-  marks: [
-    Plot.boxX(points, { x: "ppsf_usd", y: d => areaName.get(d.sub_area_id) ?? d.sub_area_id, sort: { y: "x", reduce: "median" } })
-  ],
-  height: 400
-})
 ```
