@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-05-03T21:26:58Z",
+  "as_of": "2026-05-03T21:37:46Z",
   "scorecards": [
     {
       "id": "forest_hills",
@@ -11,10 +11,10 @@
       "config_median_12mo_usd": 759750,
       "config_yoy_pct": 9.0,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 25,
+        "median_price_usd": 849999,
+        "median_ppsf_usd": 339,
+        "median_dom_days": 39
       },
       "sold_30d": {
         "n": 0,
@@ -31,7 +31,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "hollywood_heights",
@@ -43,10 +43,10 @@
       "config_median_12mo_usd": 749000,
       "config_yoy_pct": 47.2,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 9,
+        "median_price_usd": 775000,
+        "median_ppsf_usd": 485,
+        "median_dom_days": 24
       },
       "sold_30d": {
         "n": 0,
@@ -63,7 +63,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "m_streets",
@@ -75,10 +75,10 @@
       "config_median_12mo_usd": 865000,
       "config_yoy_pct": -6.9,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 9,
+        "median_price_usd": 925000,
+        "median_ppsf_usd": 388,
+        "median_dom_days": 23
       },
       "sold_30d": {
         "n": 0,
@@ -95,7 +95,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "moss_farm",
@@ -107,10 +107,10 @@
       "config_median_12mo_usd": 754967,
       "config_yoy_pct": 26.0,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 11,
+        "median_price_usd": 849900,
+        "median_ppsf_usd": 288,
+        "median_dom_days": 24
       },
       "sold_30d": {
         "n": 0,
@@ -127,7 +127,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "merriman_park_estates",
@@ -139,10 +139,10 @@
       "config_median_12mo_usd": 837500,
       "config_yoy_pct": 15.0,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 1,
+        "median_price_usd": 614000,
+        "median_ppsf_usd": 352,
+        "median_dom_days": 46
       },
       "sold_30d": {
         "n": 0,
@@ -159,7 +159,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "casa_linda",
@@ -203,10 +203,10 @@
       "config_median_12mo_usd": 1031181,
       "config_yoy_pct": null,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 14,
+        "median_price_usd": 977000.0,
+        "median_ppsf_usd": 350.5,
+        "median_dom_days": 63.5
       },
       "sold_30d": {
         "n": 0,
@@ -223,7 +223,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "old_lake_highlands",
@@ -235,10 +235,10 @@
       "config_median_12mo_usd": 579000,
       "config_yoy_pct": 21.1,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 15,
+        "median_price_usd": 865000,
+        "median_ppsf_usd": 290.0,
+        "median_dom_days": 42
       },
       "sold_30d": {
         "n": 0,
@@ -255,7 +255,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "l_streets",
@@ -267,10 +267,10 @@
       "config_median_12mo_usd": 599000,
       "config_yoy_pct": 11.0,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 12,
+        "median_price_usd": 680000.0,
+        "median_ppsf_usd": 317.0,
+        "median_dom_days": 23.5
       },
       "sold_30d": {
         "n": 0,
@@ -287,7 +287,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "town_creek",
@@ -299,10 +299,10 @@
       "config_median_12mo_usd": 750000,
       "config_yoy_pct": null,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 4,
+        "median_price_usd": 957500.0,
+        "median_ppsf_usd": 282.0,
+        "median_dom_days": 24.0
       },
       "sold_30d": {
         "n": 0,
@@ -319,7 +319,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "lochwood",
@@ -363,10 +363,10 @@
       "config_median_12mo_usd": 662000,
       "config_yoy_pct": -22.1,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 4,
+        "median_price_usd": 884900.0,
+        "median_ppsf_usd": 402.5,
+        "median_dom_days": 7.0
       },
       "sold_30d": {
         "n": 0,
@@ -383,7 +383,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     },
     {
       "id": "lakewood_heights",
@@ -395,10 +395,10 @@
       "config_median_12mo_usd": 1200000,
       "config_yoy_pct": null,
       "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
+        "n": 5,
+        "median_price_usd": 799900,
+        "median_ppsf_usd": 311,
+        "median_dom_days": 25
       },
       "sold_30d": {
         "n": 0,
@@ -415,7 +415,7 @@
         "median_price_usd": null,
         "median_ppsf_usd": null
       },
-      "turnover_proxy": null
+      "turnover_proxy": 0.0
     }
   ]
 }
