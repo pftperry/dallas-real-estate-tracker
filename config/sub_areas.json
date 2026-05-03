@@ -315,6 +315,23 @@
       "tier": "C",
       "notes": "Range mid-$600s to $900s. RISD at lower entry than Merriman Park or LH Estates.",
       "bbox": {"sw_lat": 32.885, "sw_lng": -96.735, "ne_lat": 32.900, "ne_lng": -96.720}
+    },
+    {
+      "id": "little_forest_hills",
+      "name": "Little Forest Hills",
+      "zip_codes": ["75218"],
+      "lakewood_orbit": 0.9,
+      "school_district": "DISD",
+      "feeder_pattern": "Bryan Adams HS / Hill MS / Hexter Elementary",
+      "school_quality_score": 6,
+      "median_sale_12mo_usd": 480000,
+      "median_sale_recent_usd": 480000,
+      "dom_recent_days": null,
+      "ppsf_usd": null,
+      "yoy_appreciation_pct": -41.0,
+      "tier": "A",
+      "notes": "Promoted from watch to Tier A. Quirky/artsy pocket east of White Rock Lake near the Arboretum. Median $480K means most listings are below buy box, but renovated cottages and new construction in the upper $700s to $1M+ do exist -- pull the trigger when one appears. Lake-adjacent character similar to Casa Linda but more eccentric. Bryan Adams feeder is the school weak point (same as Casa Linda and Old Lake Highlands).",
+      "bbox": {"sw_lat": 32.832, "sw_lng": -96.722, "ne_lat": 32.845, "ne_lng": -96.708}
     }
   ],
   "watch_areas": [
@@ -339,16 +356,6 @@
       "yoy_appreciation_pct": -22.1,
       "notes": "147 DOM = very slow. Either stale market or hidden opportunity.",
       "bbox": {"sw_lat": 32.840, "sw_lng": -96.770, "ne_lat": 32.855, "ne_lng": -96.755}
-    },
-    {
-      "id": "little_forest_hills",
-      "name": "Little Forest Hills",
-      "zip_codes": ["75218"],
-      "lakewood_orbit": 0.9,
-      "median_sale_12mo_usd": 480000,
-      "yoy_appreciation_pct": -41.0,
-      "notes": "Quirky/artsy pocket east of White Rock Lake near the Arboretum. Mostly small cottages needing updates. Median $480K means most listings are below buy box. Track for the rare fully renovated cottage or new construction near $800K -- those are opportunistic but uncommon.",
-      "bbox": {"sw_lat": 32.832, "sw_lng": -96.722, "ne_lat": 32.845, "ne_lng": -96.708}
     }
   ],
   "bbox_disclaimer": "Bounding boxes are approximate and intended for v0 filtering. Refine using DCAD GIS shapefile data when polygon precision matters."
