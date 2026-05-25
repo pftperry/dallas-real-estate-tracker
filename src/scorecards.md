@@ -52,7 +52,7 @@ Plot.plot({
 
 > **Key takeaways**
 >
-> - Dots inside the green rectangle = transactions that closed in your $800K–$1.1M, 1,200–4,000 sqft buy-box space. (Note: scoring filters listings to 2,000+ sqft; this chart still shows smaller sales for market context.)
+> - Dots inside the green rectangle = transactions that closed in your $800K–$1.1M, 1,200–4,000 sqft buy-box space. (Note: scoring filters listings to 1,750+ sqft; this chart still shows smaller sales for market context.)
 > - Areas with dense clusters *inside* the rectangle have liquidity at your price point — easy comps, defensible resale.
 > - Empty space inside the rectangle = no recent comps; either you're early to that area, or that price/size combo just doesn't transact there.
 > - Dots far above the rectangle = areas already priced beyond turnkey reach at your band.

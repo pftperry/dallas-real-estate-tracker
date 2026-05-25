@@ -119,7 +119,7 @@ Inputs.table(top, {
 
 > **Key takeaways**
 >
-> - All listings shown are at least 2,000 sqft (your buy-box floor).
+> - All listings shown are at least 1,750 sqft (your buy-box floor).
 > - Click any address for the Redfin listing. Sort by Score for best overall fit, or click any column header to re-sort.
 > - $/sqft cell color is relative to the sub-area median: green = ≥10% under, gray = at, red = ≥10% over. Hover the value to see the exact percent and the median anchor.
 
