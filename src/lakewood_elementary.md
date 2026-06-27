@@ -3,6 +3,28 @@ title: Lakewood Elementary
 toc: false
 ---
 
+<style>
+  .neighborhood-label {
+    pointer-events: none;
+    background: transparent;
+    border: 0;
+  }
+  .neighborhood-label span {
+    display: inline-block;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: 0.02em;
+    text-shadow:
+      -1px -1px 0 #fff, 1px -1px 0 #fff,
+      -1px  1px 0 #fff, 1px  1px 0 #fff,
+       0   -1px 0 #fff, 0    1px 0 #fff,
+      -1px  0   0 #fff, 1px  0   0 #fff;
+  }
+</style>
+
 ```js
 import L from "npm:leaflet";
 ```
@@ -130,12 +152,24 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
     subdomains: "abcd"
   }).addTo(map);
 
-  // Sub-area outlines for context
+  // Sub-area outlines + permanent name labels for context
   for (const a of LAKEWOOD_ELEM_AREAS) {
     const bb = a.bbox;
     L.rectangle([[bb.sw_lat, bb.sw_lng], [bb.ne_lat, bb.ne_lng]], {
       color: "#6b7280", weight: 1, opacity: 0.55, fill: false, dashArray: "3,4"
-    }).bindTooltip(a.name, { sticky: true }).addTo(map);
+    }).addTo(map);
+
+    const labelLat = (bb.sw_lat + bb.ne_lat) / 2;
+    const labelLng = (bb.sw_lng + bb.ne_lng) / 2;
+    L.marker([labelLat, labelLng], {
+      interactive: false,
+      keyboard: false,
+      icon: L.divIcon({
+        className: "neighborhood-label",
+        html: `<span>${a.name}</span>`,
+        iconSize: null
+      })
+    }).addTo(map);
   }
 
   for (const d of points) {
