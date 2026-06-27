@@ -1,0 +1,266 @@
+---
+title: Lakewood Elementary
+toc: false
+---
+
+```js
+import L from "npm:leaflet";
+```
+
+# Lakewood Elementary feeder
+
+Active listings and recent sold comps restricted to sub-areas that feed **Lakewood Elementary** (DISD's strongest elementary, paired with J.L. Long MS and Woodrow Wilson HS). Six sub-areas qualify: Forest Hills, Hollywood Heights / Santa Monica, Lakewood proper, Lakewood Hills, Hillside, and Lakewood Heights (partial — verify per address).
+
+```js
+const watchlist = await FileAttachment("data/watchlist.json").json();
+const sold = await FileAttachment("data/sold.json").json();
+const subAreas = await FileAttachment("data/sub_areas.json").json();
+```
+
+```js
+// Sub-areas whose feeder_pattern includes "Lakewood Elementary"
+const LAKEWOOD_ELEM_IDS = new Set(
+  subAreas.sub_areas
+    .filter(a => (a.feeder_pattern || "").includes("Lakewood Elementary"))
+    .map(a => a.id)
+);
+const LAKEWOOD_ELEM_AREAS = subAreas.sub_areas.filter(a => LAKEWOOD_ELEM_IDS.has(a.id));
+const areaName = new Map(LAKEWOOD_ELEM_AREAS.map(a => [a.id, a.name]));
+
+const activeAll = (watchlist.listings || []).filter(d => LAKEWOOD_ELEM_IDS.has(d.sub_area_id));
+const soldAll = (sold.listings || []).filter(d => LAKEWOOD_ELEM_IDS.has(d.sub_area_id));
+
+// Parse Redfin "Month-DD-YYYY" sold_date into a real Date
+function parseSoldDate(s) {
+  if (!s) return null;
+  const m = String(s).match(/^([A-Za-z]+)-(\d{1,2})-(\d{4})$/);
+  if (!m) return null;
+  const months = {January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+  const mo = months[m[1]];
+  if (mo == null) return null;
+  return new Date(Date.UTC(+m[3], mo, +m[2]));
+}
+const soldDated = soldAll
+  .map(d => ({...d, _date: parseSoldDate(d.sold_date)}))
+  .filter(d => d._date);
+```
+
+<div class="grid grid-cols-4">
+  <div class="card"><h2>Active listings</h2><span class="big">${activeAll.length}</span></div>
+  <div class="card"><h2>Median list price</h2><span class="big">$${activeAll.length ? Math.round(d3.median(activeAll, d => d.price_usd)/1000) : "—"}k</span></div>
+  <div class="card"><h2>Sold (recent)</h2><span class="big">${soldAll.length}</span></div>
+  <div class="card"><h2>Median sold $/sqft</h2><span class="big">$${soldAll.length ? Math.round(d3.median(soldAll.filter(d => d.ppsf_usd), d => d.ppsf_usd)) : "—"}</span></div>
+</div>
+
+## Price trend — sold $/sqft by month
+
+```js
+{
+  // Bin sold homes by year-month and compute median $/sqft + median price
+  const byMonth = d3.rollups(
+    soldDated.filter(d => d.ppsf_usd),
+    v => ({
+      n: v.length,
+      median_ppsf: d3.median(v, d => d.ppsf_usd),
+      median_price: d3.median(v, d => d.price_usd),
+    }),
+    d => `${d._date.getUTCFullYear()}-${String(d._date.getUTCMonth()+1).padStart(2,"0")}`
+  )
+  .map(([month, stats]) => ({month, ...stats}))
+  .sort((a, b) => d3.ascending(a.month, b.month));
+
+  display(html`<div style="font-size: 12px; color: var(--theme-foreground-muted); margin-bottom: 6px;">
+    ${byMonth.length} month(s) of data · marker size scales with sample count
+  </div>`);
+
+  display(Plot.plot({
+    height: 260,
+    marginLeft: 60,
+    x: { label: "Sale month", type: "band" },
+    y: { label: "Median $/sqft", grid: true, tickFormat: d => "$" + d },
+    marks: [
+      Plot.ruleY([0], { stroke: "transparent" }),
+      Plot.line(byMonth, { x: "month", y: "median_ppsf", stroke: "#16a34a", strokeWidth: 2, curve: "monotone-x" }),
+      Plot.dot(byMonth, {
+        x: "month",
+        y: "median_ppsf",
+        r: d => Math.max(4, Math.min(14, Math.sqrt(d.n) * 2.5)),
+        fill: "#16a34a",
+        stroke: "white",
+        title: d => `${d.month}\nMedian $/sqft: $${Math.round(d.median_ppsf)}\nMedian price: $${(d.median_price/1000).toFixed(0)}k\nN: ${d.n}`
+      }),
+      Plot.text(byMonth, {
+        x: "month",
+        y: "median_ppsf",
+        text: d => `$${Math.round(d.median_ppsf)}`,
+        dy: -14,
+        fontWeight: 600,
+        fontSize: 11
+      })
+    ]
+  }));
+}
+```
+
+> **How to read it.** Each dot is one month of sold comps in the Lakewood Elementary feeder zone. Dot size = sample count (bigger = more confident). Thin months are noisy — don't read a single low-volume tick as a trend. Recent direction matters more than absolute level.
+
+## Heat map — recent sold $/sqft
+
+```js
+const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; border: 1px solid var(--theme-foreground-faintest);"></div>`);
+```
+
+```js
+{
+  const points = soldAll.filter(d => d.lat && d.lng && d.ppsf_usd);
+  // Use a percentile-clipped domain so a single outlier doesn't wash out the color scale
+  const sortedPpsf = points.map(d => d.ppsf_usd).sort(d3.ascending);
+  const lo = d3.quantile(sortedPpsf, 0.05) ?? sortedPpsf[0];
+  const hi = d3.quantile(sortedPpsf, 0.95) ?? sortedPpsf[sortedPpsf.length - 1];
+  const ppsfColor = d3.scaleSequential(d3.interpolateRdYlGn).domain([hi, lo]);
+
+  // Center on Lakewood-area centroid; zoom in tighter than the global map
+  const lats = points.map(d => d.lat), lngs = points.map(d => d.lng);
+  const centerLat = lats.length ? d3.mean(lats) : 32.832;
+  const centerLng = lngs.length ? d3.mean(lngs) : -96.745;
+  const map = L.map(mapDiv, { scrollWheelZoom: true }).setView([centerLat, centerLng], 13.5);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19,
+    subdomains: "abcd"
+  }).addTo(map);
+
+  // Sub-area outlines for context
+  for (const a of LAKEWOOD_ELEM_AREAS) {
+    const bb = a.bbox;
+    L.rectangle([[bb.sw_lat, bb.sw_lng], [bb.ne_lat, bb.ne_lng]], {
+      color: "#6b7280", weight: 1, opacity: 0.55, fill: false, dashArray: "3,4"
+    }).bindTooltip(a.name, { sticky: true }).addTo(map);
+  }
+
+  for (const d of points) {
+    const popup = `
+      <div style="font-size: 12px; line-height: 1.45">
+        <b><a href="${d.url}" target="_blank" rel="noopener">${d.address}</a></b><br>
+        Sold ${d.sold_date}<br>
+        $${(d.price_usd/1000).toFixed(0)}k &nbsp;·&nbsp; ${d.sqft?.toLocaleString() ?? "—"} sqft &nbsp;·&nbsp; <b>$${d.ppsf_usd}/sqft</b><br>
+        ${d.beds ?? "—"} bd / ${d.baths ?? "—"} ba &nbsp;·&nbsp; built ${d.year_built ?? "—"}<br>
+        ${areaName.get(d.sub_area_id) ?? ""}
+      </div>
+    `;
+    L.circleMarker([d.lat, d.lng], {
+      radius: 7,
+      fillColor: ppsfColor(d.ppsf_usd),
+      color: "#1f2937",
+      weight: 0.6,
+      fillOpacity: 0.88
+    }).bindPopup(popup).addTo(map);
+  }
+
+  const legend = L.control({ position: "bottomright" });
+  legend.onAdd = () => {
+    const div = L.DomUtil.create("div", "info legend");
+    div.style.background = "rgba(255,255,255,0.92)";
+    div.style.padding = "6px 10px";
+    div.style.fontSize = "11px";
+    div.style.lineHeight = "1.5";
+    div.style.borderRadius = "4px";
+    div.style.boxShadow = "0 1px 4px rgba(0,0,0,0.15)";
+    const grades = [Math.round(lo), Math.round((lo + hi) / 2), Math.round(hi)];
+    div.innerHTML = `
+      <b>$/sqft (5–95%)</b><br>
+      ${grades.map(v => `<span style="display:inline-block;width:10px;height:10px;background:${ppsfColor(v)};margin-right:4px;border-radius:50%"></span>$${v}`).join("<br>")}
+    `;
+    return div;
+  };
+  legend.addTo(map);
+}
+```
+
+> **How to read it.** Color = $/sqft of the most recent sold comps. Green = relatively cheap on a $/sqft basis, red = expensive. The scale is clipped to the 5th–95th percentile so a single outlier doesn't wash out the gradient. Tight clusters of green next to red = micro-arbitrage between adjacent streets — worth a closer look.
+
+## Sub-area rollup (Lakewood Elementary only)
+
+```js
+{
+  const rows = LAKEWOOD_ELEM_AREAS.map(a => {
+    const soldHere = soldAll.filter(d => d.sub_area_id === a.id && d.ppsf_usd);
+    const activeHere = activeAll.filter(d => d.sub_area_id === a.id);
+    return {
+      sub_area: a.name,
+      tier: a.tier,
+      n_sold: soldHere.length,
+      median_sold_price: soldHere.length ? Math.round(d3.median(soldHere, d => d.price_usd)) : null,
+      median_ppsf: soldHere.length ? Math.round(d3.median(soldHere, d => d.ppsf_usd)) : null,
+      n_active: activeHere.length,
+      median_active_price: activeHere.length ? Math.round(d3.median(activeHere, d => d.price_usd)) : null,
+    };
+  }).sort((a, b) => d3.descending(a.n_sold, b.n_sold));
+
+  display(Inputs.table(rows, {
+    columns: ["sub_area", "tier", "n_sold", "median_sold_price", "median_ppsf", "n_active", "median_active_price"],
+    header: {
+      sub_area: "Sub-area",
+      tier: "Tier",
+      n_sold: "Sold (n)",
+      median_sold_price: "Median sold",
+      median_ppsf: "$/sqft",
+      n_active: "Active (n)",
+      median_active_price: "Median active"
+    },
+    format: {
+      median_sold_price: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
+      median_active_price: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
+      median_ppsf: v => v ? `$${v}` : "—"
+    },
+    rows: 20,
+    width: { sub_area: 220, tier: 50 }
+  }));
+}
+```
+
+## Active listings — Lakewood Elementary feeder
+
+```js
+{
+  const rows = activeAll.slice().sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
+  if (rows.length === 0) {
+    display(html`<p><i>No active listings in the Lakewood Elementary feeder zone matching the current buy box.</i></p>`);
+  } else {
+    display(Inputs.table(rows, {
+      columns: ["_score", "sub_area_id", "address", "price_usd", "ppsf_usd", "beds", "baths", "sqft", "year_built", "days_on_market"],
+      header: {
+        _score: "Score",
+        sub_area_id: "Sub-area",
+        address: "Address",
+        price_usd: "Price",
+        ppsf_usd: "$/sqft",
+        beds: "Bd",
+        baths: "Ba",
+        sqft: "Sqft",
+        year_built: "Yr",
+        days_on_market: "DOM"
+      },
+      format: {
+        _score: v => html`<b>${v}</b>`,
+        sub_area_id: v => areaName.get(v) ?? v ?? "—",
+        address: (v, i, data) => {
+          const li = data[i];
+          return li?.url ? html`<a href="${li.url}" target="_blank" rel="noopener">${v}</a>` : v;
+        },
+        price_usd: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
+        ppsf_usd: v => v ? `$${v}` : "—",
+        sqft: v => v?.toLocaleString() ?? "—"
+      },
+      rows: 30,
+      width: { _score: 60, sub_area_id: 160, address: 220, price_usd: 80, ppsf_usd: 70, sqft: 70 }
+    }));
+  }
+}
+```
+
+> **Caveats.**
+>
+> - Lakewood Heights is a *partial* Lakewood Elementary feeder — some addresses zone to Mockingbird Elementary instead. Verify per address on the DISD school locator before bidding.
+> - Sample sizes are thin month-to-month. Treat the trend line as direction, not magnitude — wait for two or three confirming months before sizing up on a perceived dip.
+> - Sold data is filtered upstream to $600K–$1.3M, so the medians here reflect that price band, not the entire neighborhood.

@@ -7,6 +7,7 @@ export default {
   title: "Dallas Real Estate Tracker",
   pages: [
     { name: "Watchlist", path: "/" },
+    { name: "Lakewood Elementary", path: "/lakewood_elementary" },
     { name: "Strategy", path: "/strategy" },
     { name: "Sub-area scorecards", path: "/scorecards" },
     { name: "Comps explorer", path: "/comps" },
