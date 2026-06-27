@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-06-27T08:48:12Z",
+  "as_of": "2026-06-27T15:58:32Z",
   "source": "Redfin gis-csv",
   "status": "active",
   "filters": {
     "min_price": 600000,
     "max_price": 1300000
   },
-  "n_listings": 125,
+  "n_listings": 124,
   "listings": [
     {
       "address": "935 N Buckner Blvd",
@@ -3204,32 +3204,6 @@
       "lng": -96.6991333,
       "sub_area_id": "lochwood",
       "mls_number": "21187070",
-      "sold_date": ""
-    },
-    {
-      "address": "965 Easton Pl",
-      "city": "Dallas",
-      "state": "TX",
-      "zip": "75218",
-      "mls_subdivision": "Eastwood Estates",
-      "price_usd": 950000,
-      "beds": 3.0,
-      "baths": 2.5,
-      "sqft": 2773,
-      "lot_size_sqft": 8059,
-      "year_built": 1976,
-      "days_on_market": 94,
-      "ppsf_usd": 343,
-      "hoa_per_month_usd": 25,
-      "property_type": "Single Family Residential",
-      "status": "Active",
-      "next_open_house_start": "",
-      "next_open_house_end": "",
-      "url": "https://www.redfin.com/TX/Dallas/965-Easton-Pl-75218/home/30866701",
-      "lat": 32.8461485,
-      "lng": -96.6966298,
-      "sub_area_id": "lochwood",
-      "mls_number": "21211075",
       "sold_date": ""
     },
     {

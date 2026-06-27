@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-27T08:48:12Z",
+  "as_of": "2026-06-27T15:58:32Z",
   "scorecards": [
     {
       "id": "forest_hills",
@@ -619,10 +619,10 @@
       "config_median_12mo_usd": 603000,
       "config_yoy_pct": -11.0,
       "active": {
-        "n": 6,
-        "median_price_usd": 760000.0,
-        "median_ppsf_usd": 335.5,
-        "median_dom_days": 44.5
+        "n": 5,
+        "median_price_usd": 745000,
+        "median_ppsf_usd": 332,
+        "median_dom_days": 15
       },
       "sold_30d": {
         "n": 0,
