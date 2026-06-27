@@ -308,6 +308,122 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
 }
 ```
 
+## Active listing map
+
+```js
+const activeMapDiv = display(html`<div style="height: 520px; border-radius: 4px; border: 1px solid var(--theme-foreground-faintest);"></div>`);
+```
+
+```js
+{
+  const points = activeAll.filter(d => d.lat && d.lng);
+  if (points.length === 0) {
+    activeMapDiv.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--theme-foreground-muted);font-style:italic">No active listings in the Lakewood Elementary feeder zone right now.</div>`;
+  } else {
+    // Color by absolute $/sqft (matches the sold heat map's logic).
+    // With small N (<20), use raw min/max; with more data, clip to 5–95%.
+    const pricedPoints = points.filter(d => d.ppsf_usd);
+    const sortedPpsf = pricedPoints.map(d => d.ppsf_usd).sort(d3.ascending);
+    const clip = sortedPpsf.length >= 20;
+    const lo = clip ? d3.quantile(sortedPpsf, 0.05) : sortedPpsf[0];
+    const hi = clip ? d3.quantile(sortedPpsf, 0.95) : sortedPpsf[sortedPpsf.length - 1];
+    const activePpsfColor = d3.scaleSequential(d3.interpolateRdYlGn).domain([hi, lo]);
+
+    const lats = points.map(d => d.lat), lngs = points.map(d => d.lng);
+    const centerLat = d3.mean(lats), centerLng = d3.mean(lngs);
+    const map = L.map(activeMapDiv, { scrollWheelZoom: true }).setView([centerLat, centerLng], 13.5);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      maxZoom: 19,
+      subdomains: "abcd"
+    }).addTo(map);
+
+    // Sub-area outlines + labels (same overlays as the sold map)
+    for (const a of LAKEWOOD_ELEM_AREAS) {
+      const bb = a.bbox;
+      L.rectangle([[bb.sw_lat, bb.sw_lng], [bb.ne_lat, bb.ne_lng]], {
+        color: "#6b7280", weight: 1, opacity: 0.55, fill: false, dashArray: "3,4"
+      }).addTo(map);
+      const labelLat = (bb.sw_lat + bb.ne_lat) / 2;
+      const labelLng = (bb.sw_lng + bb.ne_lng) / 2;
+      L.marker([labelLat, labelLng], {
+        interactive: false, keyboard: false,
+        icon: L.divIcon({ className: "neighborhood-label", html: `<span>${a.name}</span>`, iconSize: null })
+      }).addTo(map);
+    }
+
+    for (const d of points) {
+      const score = d._score ?? 0;
+      const radius = 7 + score / 20; // larger dot = higher buy-fit score
+      const fill = d.ppsf_usd ? activePpsfColor(d.ppsf_usd) : "#9ca3af";
+      const busy = d._busy_street
+        ? `<span title="On or near ${d._nearest_arterial ?? "a busy street"}" style="color:#dc2626">⚠ busy street</span><br>`
+        : "";
+      const popup = `
+        <div style="font-size: 12px; line-height: 1.45">
+          <b><a href="${d.url}" target="_blank" rel="noopener">${d.address}</a></b><br>
+          <b>Score:</b> ${score} &nbsp;·&nbsp; DOM: ${d.days_on_market ?? "—"}<br>
+          ${busy}
+          $${(d.price_usd/1000).toFixed(0)}k &nbsp;·&nbsp; ${d.sqft?.toLocaleString() ?? "—"} sqft &nbsp;·&nbsp; <b>$${d.ppsf_usd ?? "—"}/sqft</b><br>
+          ${d.beds ?? "—"} bd / ${d.baths ?? "—"} ba &nbsp;·&nbsp; built ${d.year_built ?? "—"}<br>
+          ${areaName.get(d.sub_area_id) ?? ""}
+        </div>
+      `;
+      L.circleMarker([d.lat, d.lng], {
+        radius,
+        fillColor: fill,
+        color: "#1f2937",
+        weight: 0.8,
+        fillOpacity: 0.9
+      }).bindPopup(popup).addTo(map);
+    }
+
+    // School marker (same as sold map)
+    const SCHOOL = { lat: 32.81965, lng: -96.74842, name: "Lakewood Elementary", addr: "3000 Hillbrook St" };
+    L.marker([SCHOOL.lat, SCHOOL.lng], {
+      icon: L.divIcon({
+        className: "school-marker",
+        html: `<div class="school-pin" title="${SCHOOL.name}">🏫</div>`,
+        iconSize: [32, 32], iconAnchor: [16, 16]
+      }),
+      zIndexOffset: 1000
+    }).bindPopup(`<b>${SCHOOL.name}</b><br>${SCHOOL.addr}<br><i style="color:#6b7280">DISD K-5 · feeder anchor</i>`).addTo(map);
+
+    // Legend
+    const legend = L.control({ position: "bottomright" });
+    legend.onAdd = () => {
+      const div = L.DomUtil.create("div", "info legend");
+      div.style.background = "rgba(255,255,255,0.92)";
+      div.style.padding = "6px 10px";
+      div.style.fontSize = "11px";
+      div.style.lineHeight = "1.5";
+      div.style.borderRadius = "4px";
+      div.style.boxShadow = "0 1px 4px rgba(0,0,0,0.15)";
+      const grades = pricedPoints.length
+        ? [Math.round(lo), Math.round((lo + hi) / 2), Math.round(hi)]
+        : [];
+      const scaleHtml = grades.length
+        ? `<b>$/sqft${clip ? " (5–95%)" : ""}</b><br>` +
+          grades.map(v => `<span style="display:inline-block;width:10px;height:10px;background:${activePpsfColor(v)};margin-right:4px;border-radius:50%"></span>$${v}`).join("<br>")
+        : "";
+      div.innerHTML = `
+        ${scaleHtml}
+        <hr style="margin:5px 0; border:0; border-top:1px solid #e5e7eb;">
+        <b>Marker size</b><br>
+        <span style="display:inline-block;width:6px;height:6px;background:#6b7280;border-radius:50%;margin-right:4px"></span>low score<br>
+        <span style="display:inline-block;width:14px;height:14px;background:#6b7280;border-radius:50%;margin-right:4px;vertical-align:middle"></span>high score
+        <hr style="margin:5px 0; border:0; border-top:1px solid #e5e7eb;">
+        <span style="display:inline-block;width:14px;height:14px;background:#facc15;border:1.5px solid #1f2937;border-radius:50%;vertical-align:middle;text-align:center;font-size:9px;line-height:11px;margin-right:4px">🏫</span>Lakewood Elem
+      `;
+      return div;
+    };
+    legend.addTo(map);
+  }
+}
+```
+
+> **How to read it.** Marker color = absolute $/sqft (same scale as the sold heat map below — red is pricey, green is cheap). Marker size scales with the buy-fit score from the Watchlist, so high-fit listings visually pop. Click any dot for full details and a Redfin link. The 🏫 pin marks Lakewood Elementary itself.
+
 ## Active listings — Lakewood Elementary feeder
 
 ```js
