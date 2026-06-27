@@ -23,6 +23,21 @@ toc: false
        0   -1px 0 #fff, 0    1px 0 #fff,
       -1px  0   0 #fff, 1px  0   0 #fff;
   }
+  .school-marker { background: transparent; border: 0; }
+  .school-pin {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #facc15;
+    border: 2px solid #1f2937;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+  }
 </style>
 
 ```js
@@ -204,6 +219,20 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
     }).bindPopup(popup).addTo(map);
   }
 
+  // Lakewood Elementary School marker (3000 Hillbrook St, Dallas, TX 75214)
+  const SCHOOL = { lat: 32.81965, lng: -96.74842, name: "Lakewood Elementary", addr: "3000 Hillbrook St" };
+  L.marker([SCHOOL.lat, SCHOOL.lng], {
+    icon: L.divIcon({
+      className: "school-marker",
+      html: `<div class="school-pin" title="${SCHOOL.name}">🏫</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    }),
+    zIndexOffset: 1000
+  })
+    .bindPopup(`<b>${SCHOOL.name}</b><br>${SCHOOL.addr}<br><i style="color:#6b7280">DISD K-5 · feeder anchor</i>`)
+    .addTo(map);
+
   const legend = L.control({ position: "bottomright" });
   legend.onAdd = () => {
     const div = L.DomUtil.create("div", "info legend");
@@ -217,6 +246,8 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
     div.innerHTML = `
       <b>$/sqft (5–95%)</b><br>
       ${grades.map(v => `<span style="display:inline-block;width:10px;height:10px;background:${ppsfColor(v)};margin-right:4px;border-radius:50%"></span>$${v}`).join("<br>")}
+      <hr style="margin:5px 0; border:0; border-top:1px solid #e5e7eb;">
+      <span style="display:inline-block;width:14px;height:14px;background:#facc15;border:1.5px solid #1f2937;border-radius:50%;vertical-align:middle;text-align:center;font-size:9px;line-height:11px;margin-right:4px">🏫</span>Lakewood Elem
     `;
     return div;
   };
