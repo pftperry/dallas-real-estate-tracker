@@ -65,6 +65,19 @@ function parseSoldDate(s) {
 const soldDated = soldAll
   .map(d => ({...d, _date: parseSoldDate(d.sold_date)}))
   .filter(d => d._date);
+
+// Color scales — match the Watchlist tab.
+// $/sqft: green when % below baseline, red when % above (-25% .. +25%).
+const ppsfColor = d3.scaleLinear()
+  .domain([-0.25, 0, 0.25])
+  .range(["#16a34a", "#737373", "#dc2626"])
+  .clamp(true);
+// DOM: longer-on-market = more buyer leverage = green; freshly listed = red.
+// 0d red -> ~30d gray -> 60d+ green.
+const domColor = d3.scaleLinear()
+  .domain([0, 30, 60])
+  .range(["#dc2626", "#737373", "#16a34a"])
+  .clamp(true);
 ```
 
 <div class="grid grid-cols-4">
@@ -217,6 +230,9 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
 
 ```js
 {
+  const feederPpsfs = soldAll.map(d => d.ppsf_usd).filter(Boolean);
+  const feederMedianPpsf = feederPpsfs.length ? d3.median(feederPpsfs) : null;
+
   const rows = LAKEWOOD_ELEM_AREAS.map(a => {
     const soldHere = soldAll.filter(d => d.sub_area_id === a.id && d.ppsf_usd);
     const activeHere = activeAll.filter(d => d.sub_area_id === a.id);
@@ -245,7 +261,15 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
     format: {
       median_sold_price: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
       median_active_price: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
-      median_ppsf: v => v ? `$${v}` : "—"
+      median_ppsf: v => {
+        if (!v) return "—";
+        if (!feederMedianPpsf) return `$${v}`;
+        const diff = (v - feederMedianPpsf) / feederMedianPpsf;
+        const pct = (diff * 100).toFixed(0);
+        const sign = diff > 0 ? "+" : "";
+        const tip = `${sign}${pct}% vs Lakewood feeder median ($${Math.round(feederMedianPpsf)}/sqft)`;
+        return html`<span style="color: ${ppsfColor(diff)}; font-weight: 600;" title=${tip}>$${v}</span>`;
+      }
     },
     rows: 20,
     width: { sub_area: 220, tier: 50 }
@@ -283,8 +307,25 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
           return li?.url ? html`<a href="${li.url}" target="_blank" rel="noopener">${v}</a>` : v;
         },
         price_usd: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
-        ppsf_usd: v => v ? `$${v}` : "—",
-        sqft: v => v?.toLocaleString() ?? "—"
+        ppsf_usd: (v, i, data) => {
+          if (!v) return "—";
+          const li = data[i];
+          const baseline = li._ppsf_baseline ?? watchlist.area_ppsf_medians?.[li.sub_area_id];
+          if (!baseline) return `$${v}`;
+          const diff = (v - baseline) / baseline;
+          const pct = (diff * 100).toFixed(0);
+          const sign = diff > 0 ? "+" : "";
+          const tip = `${sign}${pct}% vs ${li._ppsf_baseline_source || "baseline"} ($${Math.round(baseline)}/sqft)`;
+          return html`<span style="color: ${ppsfColor(diff)}; font-weight: 600;" title=${tip}>$${v}</span>`;
+        },
+        sqft: v => v?.toLocaleString() ?? "—",
+        days_on_market: v => {
+          if (v == null) return "—";
+          const tip = v >= 60 ? "Stale — buyer leverage"
+            : v >= 30 ? "Moderate DOM"
+            : "Fresh listing — limited leverage";
+          return html`<span style="color: ${domColor(v)}; font-weight: 600;" title=${tip}>${v}</span>`;
+        }
       },
       rows: 30,
       width: { _score: 60, sub_area_id: 160, address: 220, price_usd: 80, ppsf_usd: 70, sqft: 70 }
