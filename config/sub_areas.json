@@ -163,6 +163,22 @@
       "bbox": {"sw_lat": 32.840, "sw_lng": -96.745, "ne_lat": 32.855, "ne_lng": -96.730}
     },
     {
+      "id": "junius_heights",
+      "name": "Junius Heights / Peak's Suburban / Munger Place",
+      "zip_codes": ["75223", "75214"],
+      "lakewood_orbit": 0.85,
+      "school_district": "DISD",
+      "feeder_pattern": "Woodrow Wilson HS / J.L. Long MS / Lakewood Elementary (partial)",
+      "school_quality_score": 9,
+      "tier_override_reason": "Lakewood Elementary feeder (partial) -- verify per address on DISD school locator",
+      "median_sale_12mo_usd": null,
+      "dom_recent_days": null,
+      "yoy_appreciation_pct": null,
+      "tier": "A",
+      "notes": "Historic conservation districts south of Garland Rd / Reiger Ave: Junius Heights, Munger Place, Peak's Suburban. Lakewood Elementary zoning splits per street -- some addresses feed Lipscomb or other elementaries instead. Confirm via DISD school locator before bidding. Original Craftsman / Prairie / Tudor stock from 1900s-1920s, often renovated. Walk to Lakewood Shopping Center and Tenison Park. Median typically below the \\$800K buy-box floor, so this sub-area is more useful for context / comps than as a primary screen.",
+      "bbox": {"sw_lat": 32.795, "sw_lng": -96.760, "ne_lat": 32.815, "ne_lng": -96.730}
+    },
+    {
       "id": "caruth_terrace",
       "name": "Caruth Terrace",
       "zip_codes": ["75206"],

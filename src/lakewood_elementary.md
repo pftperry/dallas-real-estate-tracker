@@ -46,7 +46,7 @@ import L from "npm:leaflet";
 
 # Lakewood Elementary feeder
 
-Active listings and recent sold comps restricted to sub-areas that feed **Lakewood Elementary** (DISD's strongest elementary, paired with J.L. Long MS and Woodrow Wilson HS). Six sub-areas qualify: Forest Hills, Hollywood Heights / Santa Monica, Lakewood proper, Lakewood Hills, Hillside, and Lakewood Heights (partial — verify per address).
+Active listings and recent sold comps restricted to sub-areas that feed **Lakewood Elementary** (DISD's strongest elementary, paired with J.L. Long MS and Woodrow Wilson HS). Seven sub-areas qualify: Forest Hills, Hollywood Heights / Santa Monica, Lakewood proper, Lakewood Hills, Hillside, Lakewood Heights *(partial)*, and Junius Heights / Peak's Suburban / Munger Place *(partial)* — verify per address on the DISD school locator for the partial feeders.
 
 ```js
 const watchlist = await FileAttachment("data/watchlist.json").json();
