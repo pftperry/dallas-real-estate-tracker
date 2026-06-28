@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-28T04:16:03Z",
+  "as_of": "2026-06-28T09:25:56Z",
   "scorecards": [
     {
       "id": "forest_hills",
@@ -14,7 +14,7 @@
         "n": 2,
         "median_price_usd": 774500.0,
         "median_ppsf_usd": 457.0,
-        "median_dom_days": 8.0
+        "median_dom_days": 9.0
       },
       "sold_30d": {
         "n": 0,
@@ -46,7 +46,7 @@
         "n": 4,
         "median_price_usd": 774000.0,
         "median_ppsf_usd": 496.5,
-        "median_dom_days": 41.5
+        "median_dom_days": 42.5
       },
       "sold_30d": {
         "n": 0,
@@ -78,7 +78,7 @@
         "n": 16,
         "median_price_usd": 907500.0,
         "median_ppsf_usd": 499.0,
-        "median_dom_days": 19.5
+        "median_dom_days": 20.5
       },
       "sold_30d": {
         "n": 0,
@@ -110,7 +110,7 @@
         "n": 1,
         "median_price_usd": 815000,
         "median_ppsf_usd": 576,
-        "median_dom_days": 319
+        "median_dom_days": 320
       },
       "sold_30d": {
         "n": 0,
@@ -142,7 +142,7 @@
         "n": 13,
         "median_price_usd": 790000,
         "median_ppsf_usd": 418,
-        "median_dom_days": 43
+        "median_dom_days": 44
       },
       "sold_30d": {
         "n": 0,
@@ -238,7 +238,7 @@
         "n": 2,
         "median_price_usd": 1212000.0,
         "median_ppsf_usd": 403.0,
-        "median_dom_days": 68.5
+        "median_dom_days": 69.5
       },
       "sold_30d": {
         "n": 0,
@@ -270,7 +270,7 @@
         "n": 1,
         "median_price_usd": 649000,
         "median_ppsf_usd": 253,
-        "median_dom_days": 354
+        "median_dom_days": 355
       },
       "sold_30d": {
         "n": 0,
@@ -302,7 +302,7 @@
         "n": 28,
         "median_price_usd": 774950.0,
         "median_ppsf_usd": 298.0,
-        "median_dom_days": 54.0
+        "median_dom_days": 55.0
       },
       "sold_30d": {
         "n": 0,
@@ -334,7 +334,7 @@
         "n": 3,
         "median_price_usd": 825000,
         "median_ppsf_usd": 348,
-        "median_dom_days": 30
+        "median_dom_days": 31
       },
       "sold_30d": {
         "n": 0,
@@ -366,7 +366,7 @@
         "n": 17,
         "median_price_usd": 799000,
         "median_ppsf_usd": 348,
-        "median_dom_days": 40
+        "median_dom_days": 41
       },
       "sold_30d": {
         "n": 0,
@@ -398,7 +398,7 @@
         "n": 14,
         "median_price_usd": 839450.0,
         "median_ppsf_usd": 280.5,
-        "median_dom_days": 27.5
+        "median_dom_days": 28.5
       },
       "sold_30d": {
         "n": 0,
@@ -494,7 +494,7 @@
         "n": 14,
         "median_price_usd": 837000.0,
         "median_ppsf_usd": 329.5,
-        "median_dom_days": 38.0
+        "median_dom_days": 39.0
       },
       "sold_30d": {
         "n": 0,
@@ -526,7 +526,7 @@
         "n": 14,
         "median_price_usd": 886412.5,
         "median_ppsf_usd": 331.0,
-        "median_dom_days": 16.0
+        "median_dom_days": 17.0
       },
       "sold_30d": {
         "n": 0,
@@ -558,7 +558,7 @@
         "n": 10,
         "median_price_usd": 665000.0,
         "median_ppsf_usd": 321.5,
-        "median_dom_days": 71.0
+        "median_dom_days": 72.0
       },
       "sold_30d": {
         "n": 0,
@@ -590,7 +590,7 @@
         "n": 6,
         "median_price_usd": 957500.0,
         "median_ppsf_usd": 306.5,
-        "median_dom_days": 54.0
+        "median_dom_days": 55.0
       },
       "sold_30d": {
         "n": 0,
@@ -654,7 +654,7 @@
         "n": 4,
         "median_price_usd": 760000.0,
         "median_ppsf_usd": 317.0,
-        "median_dom_days": 40.5
+        "median_dom_days": 41.5
       },
       "sold_30d": {
         "n": 0,
@@ -686,7 +686,7 @@
         "n": 1,
         "median_price_usd": 849900,
         "median_ppsf_usd": 398,
-        "median_dom_days": 66
+        "median_dom_days": 67
       },
       "sold_30d": {
         "n": 0,
