@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-28T04:10:33Z",
+  "as_of": "2026-06-28T04:16:03Z",
   "scorecards": [
     {
       "id": "forest_hills",
@@ -292,10 +292,10 @@
     {
       "id": "junius_heights",
       "name": "Junius Heights / Peak's Suburban / Munger Place",
-      "tier": "A",
-      "lakewood_orbit": 0.85,
+      "tier": "B",
+      "lakewood_orbit": 0.55,
       "school_district": "DISD",
-      "school_quality_score": 9,
+      "school_quality_score": 6,
       "config_median_12mo_usd": null,
       "config_yoy_pct": null,
       "active": {
