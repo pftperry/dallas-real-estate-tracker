@@ -27,6 +27,64 @@ class BBox:
         )
 
 
+def point_in_ring(lat: float, lng: float, ring: list) -> bool:
+    """Crossing-number (ray-casting) point-in-polygon test.
+
+    `ring` is a list of [lng, lat] pairs. The ring may be open or closed;
+    the wrap-around edge is always tested.
+    """
+    inside = False
+    n = len(ring)
+    j = n - 1
+    for i in range(n):
+        lng_i, lat_i = ring[i][0], ring[i][1]
+        lng_j, lat_j = ring[j][0], ring[j][1]
+        # Does a horizontal ray at `lat` cross this edge?
+        if (lat_i > lat) != (lat_j > lat):
+            crossing_lng = lng_i + (lat - lat_i) * (lng_j - lng_i) / (lat_j - lat_i)
+            if lng < crossing_lng:
+                inside = not inside
+        j = i
+    return inside
+
+
+@dataclass
+class Polygon:
+    """One or more rings with hole support, plus a bbox pre-filter.
+
+    `parts` entries are (exterior_ring, [hole_ring, ...]) with coords as
+    [lng, lat]. A rectangle is a poor model of a neighborhood; this lets a
+    sub-area carry its true shape where one has been traced.
+    """
+
+    parts: list[tuple[list, list]]
+    bbox: BBox
+
+    def contains(self, lat: float, lng: float) -> bool:
+        if not self.bbox.contains(lat, lng):
+            return False
+        for exterior, holes in self.parts:
+            if point_in_ring(lat, lng, exterior) and not any(
+                point_in_ring(lat, lng, hole) for hole in holes
+            ):
+                return True
+        return False
+
+    @property
+    def exterior(self) -> list:
+        """First exterior ring -- what the Redfin `poly` param needs."""
+        return self.parts[0][0] if self.parts else []
+
+    @classmethod
+    def from_ring(cls, ring: list) -> "Polygon":
+        lngs = [p[0] for p in ring]
+        lats = [p[1] for p in ring]
+        return cls(
+            parts=[(ring, [])],
+            bbox=BBox(min(lats), min(lngs), max(lats), max(lngs)),
+        )
+
+
 @dataclass
 class SubArea:
     id: str
@@ -36,6 +94,14 @@ class SubArea:
     school_quality_score: int
     bbox: BBox
     raw: dict
+    # Set when the config traces a real outline instead of a rectangle.
+    polygon: Polygon | None = None
+
+    def contains(self, lat: float, lng: float) -> bool:
+        """Polygon containment when an outline exists, else bbox."""
+        if self.polygon is not None:
+            return self.polygon.contains(lat, lng)
+        return self.bbox.contains(lat, lng)
 
 
 def load_sub_areas(include_watch: bool = True) -> list[SubArea]:
@@ -51,24 +117,36 @@ def load_sub_areas(include_watch: bool = True) -> list[SubArea]:
 
 
 def _to_sub_area(entry: dict) -> SubArea:
-    bb = entry["bbox"]
+    polygon = Polygon.from_ring(entry["polygon"]) if entry.get("polygon") else None
+    if bb := entry.get("bbox"):
+        bbox = BBox(bb["sw_lat"], bb["sw_lng"], bb["ne_lat"], bb["ne_lng"])
+    elif polygon is not None:
+        # A traced outline carries its own extent; no need to restate it.
+        bbox = polygon.bbox
+    else:
+        raise ValueError(f"Sub-area {entry.get('id')!r} needs a bbox or a polygon")
     return SubArea(
         id=entry["id"],
         name=entry["name"],
         zip_codes=entry["zip_codes"],
         lakewood_orbit=float(entry.get("lakewood_orbit", 0.0)),
         school_quality_score=int(entry.get("school_quality_score", 0) or 0),
-        bbox=BBox(bb["sw_lat"], bb["sw_lng"], bb["ne_lat"], bb["ne_lng"]),
+        bbox=bbox,
         raw=entry,
+        polygon=polygon,
     )
 
 
 def assign_sub_area(lat: float | None, lng: float | None, areas: Iterable[SubArea]) -> str | None:
-    """Return the first matching sub-area id by bbox containment, or None."""
+    """Return the first containing sub-area id, or None.
+
+    Order matters: config lists specific neighborhoods before broader traced
+    zones so a listing is tagged with the tightest area that holds it.
+    """
     if lat is None or lng is None:
         return None
     for area in areas:
-        if area.bbox.contains(lat, lng):
+        if area.contains(lat, lng):
             return area.id
     return None
 

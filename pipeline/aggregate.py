@@ -20,7 +20,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from scrapers.utils import DATA_ROOT, load_sub_areas, utc_now_iso, write_snapshot
+from scrapers.utils import DATA_ROOT, utc_now_iso, write_snapshot
 
 LOG = logging.getLogger("aggregate")
 
@@ -36,13 +36,30 @@ def _med(values: list[float]) -> float | None:
 
 
 def _parse_date(s: str | None) -> datetime | None:
+    """Parse a sold date, tolerating the several shapes Redfin emits.
+
+    Redfin's gis-csv SOLD DATE column uses a spelled-out month, e.g.
+    "April-10-2026". Only numeric formats were handled here before, so every
+    sold comp silently failed to parse and every sold_30d/90d/365d bucket and
+    the turnover proxy came back empty. Month-name formats come first now
+    because that is what the live feed actually sends.
+    """
     if not s:
         return None
-    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%SZ"):
+    for fmt in (
+        "%B-%d-%Y",     # April-10-2026  <- current Redfin format
+        "%b-%d-%Y",     # Apr-10-2026
+        "%B %d, %Y",    # April 10, 2026
+        "%Y-%m-%d",
+        "%m/%d/%Y",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%dT%H:%M:%SZ",
+    ):
         try:
             return datetime.strptime(s.strip(), fmt).replace(tzinfo=timezone.utc)
         except ValueError:
             continue
+    LOG.warning("Unparseable sold_date %r -- comp dropped from time buckets", s)
     return None
 
 

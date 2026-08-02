@@ -7,6 +7,8 @@ toc: true
 
 This tab is the "what should I actually do this week" layer. The lists below are recomputed from the latest scrape every time the workflow runs.
 
+Everything shown here has already cleared the hard eligibility gate: price inside the $750K–$1M band, 3+ beds, 2+ baths, and either resolved zoning to **Mockingbird or Lakewood Elementary** or an address inside the **drawn Lake Highlands zone**. Nothing that fails one of those is down-ranked; it is excluded before scoring, so these plays are already zoning-clean.
+
 ```js
 const watchlist = await FileAttachment("data/watchlist.json").json();
 const sold = await FileAttachment("data/sold.json").json();
@@ -35,9 +37,12 @@ The watchlist's top picks. If you're going to look at five homes this week, look
 ```js
 function listingCard(li, footer) {
   const subName = areaName.get(li.sub_area_id) ?? li.sub_area_id ?? "";
-  const median = watchlist.area_ppsf_medians?.[li.sub_area_id];
+  // Prefer the scorer's size-normalized peer baseline so the percentage shown
+  // here matches what the score actually rewarded.
+  const median = li._ppsf_baseline ?? watchlist.area_ppsf_medians?.[li.sub_area_id];
+  const anchor = li._ppsf_baseline ? "peer comps" : `${subName} median`;
   const ppsfDelta = median && li.ppsf_usd
-    ? `${li.ppsf_usd > median ? "+" : ""}${Math.round(((li.ppsf_usd - median) / median) * 100)}% vs ${subName} median`
+    ? `${li.ppsf_usd > median ? "+" : ""}${Math.round(((li.ppsf_usd - median) / median) * 100)}% vs ${anchor}`
     : "";
   return html`
     <div class="card" style="padding: 0.6rem 0.8rem;">
@@ -68,19 +73,23 @@ const top5 = allActive.slice(0, 5);
 html`<div class="grid grid-cols-2 grid-cols-3-md">${top5.map(li => listingCard(li, html`<b>Score:</b> ${li._score}`))}</div>`
 ```
 
-### Hidden value (≥15% under sub-area $/sqft median)
+### Hidden value (≥15% under the size-normalized peer baseline)
 
-Mispriced or motivated sellers. These either need first-look quickly, or have a reason no one else wants them — find out why before assuming it's a deal.
+Mispriced or motivated sellers. These either need first-look quickly, or have a reason no one else wants them, so find out why before assuming it's a deal.
+
+Measured against sold comps in the same sub-area within ±25% of the listing's square footage, which is the same baseline the score uses. Larger homes carry a lower $/sqft as a matter of arithmetic, so comparing against a flat area median would surface every big house in a small-house neighborhood as a bargain.
 
 ```js
+// Use the size-normalized peer baseline the scorer uses (_ppsf_baseline: same
+// sub-area, +/-25% sqft), falling back to the area median only when no peer set
+// existed. Comparing against the raw area median flagged every large home in a
+// small-home neighborhood as "hidden value", which is the exact false positive
+// the peer baseline was introduced to kill.
+const ppsfBase = li => li._ppsf_baseline ?? watchlist.area_ppsf_medians?.[li.sub_area_id];
 const hidden = inBox.filter(li => {
-  const m = watchlist.area_ppsf_medians?.[li.sub_area_id];
+  const m = ppsfBase(li);
   return m && li.ppsf_usd && li.ppsf_usd <= m * 0.85;
-}).sort((a, b) => {
-  const ma = watchlist.area_ppsf_medians?.[a.sub_area_id] ?? 0;
-  const mb = watchlist.area_ppsf_medians?.[b.sub_area_id] ?? 0;
-  return (a.ppsf_usd / ma) - (b.ppsf_usd / mb);
-}).slice(0, 6);
+}).sort((a, b) => (a.ppsf_usd / ppsfBase(a)) - (b.ppsf_usd / ppsfBase(b))).slice(0, 6);
 
 display(hidden.length
   ? html`<div class="grid grid-cols-2 grid-cols-3-md">${hidden.map(li => listingCard(li, html`<b style="color:#16a34a">Likely undervalued</b>`))}</div>`
@@ -101,52 +110,59 @@ display(stale.length
   : html`<p><i>No buy-box listings sitting over 60 days right now. Either you're early or the market is hot — either way, no leverage plays this week.</i></p>`);
 ```
 
-### At your ceiling ($1.0M–$1.1M, score ≥ 50)
+### At your ceiling ($900K–$1.0M, score ≥ 50)
 
-Top of your band, score still solid. The rationality test: are you stretching for the right reasons (school zone, lot, condition) or just because it's available?
+Top of your band, score still solid. $1.0M is a hard ceiling now rather than a stretch target, so anything past it never appears anywhere on this page. That makes this the rationality test on the last $100K of budget: are you spending it for a real reason (zoning, lot, condition) or just because the listing exists?
 
 ```js
 const ceiling = allActive.filter(li =>
-  li.price_usd >= 1_000_000 && li.price_usd <= buyBox.price_max_usd && (li._score ?? 0) >= 50
+  li.price_usd >= 900_000 && li.price_usd <= buyBox.price_max_usd && (li._score ?? 0) >= 50
 ).slice(0, 6);
 
 display(ceiling.length
   ? html`<div class="grid grid-cols-2 grid-cols-3-md">${ceiling.map(li => listingCard(li, html`<b>$${(li.price_usd/1000).toFixed(0)}k &middot; score ${li._score}</b>`))}</div>`
-  : html`<p><i>No listings in the $1.0–1.1M band scoring ≥ 50 right now.</i></p>`);
+  : html`<p><i>No listings in the $900K–$1.0M band scoring ≥ 50 right now.</i></p>`);
 ```
 
-## Tactical playbook by tier
+## Tactical playbook by how listings qualify
 
-### Tier S — Lakewood-orbit + Mockingbird/Lakewood Elementary feeders
+Tiers no longer drive where you spend your time; the location gate does. The groups below are ordered by how reliably an area can produce an eligible listing at all. Both allowlisted elementaries feed Long MS and then Wilson HS, so the high-school anchor is identical whichever side of the gate a listing clears on.
 
-Spend the most time here. Tier S now also includes any sub-area feeding **Mockingbird Elementary**, DISD's other top-tier elementary alongside Lakewood Elem. School anchor + Woodrow Wilson HS resale defense is strong enough to override the "not Lakewood feel" knock on M Streets.
+### Whole footprint inside a qualifying zone
 
-- **Forest Hills (75218)** &mdash; Look for: 2,000–2,800 sqft homes with 8K+ lots between Garland Rd and Edmondson Ave, west of Buckner. Skip: anything backing Garland Rd or Buckner (busy-street flag in the watchlist). Note: Redfin tags newer northern subdivisions (Wyrick Estates, Lake Park) as "Forest Hills" — those are now bucketed under Lake Park Estates here. Median ~$759K (12mo); $1.1M buys the top quartile. Slowing market (48 DOM) = ask for terms (closing credit, repair credit) before discount. **Lakewood Elementary feeder.**
-- **Hollywood Heights / Santa Monica** &mdash; Look for: Tudor or Craftsman with original details. Skip: anything where exterior was recently changed without permits (conservation district = clawback risk). 47% YoY $/sqft pop is a yellow flag — verify with at least 3 same-block comps before paying ask. **Lakewood Elementary feeder.**
-- **M Streets / Greenland Hills** &mdash; Look for: Mercedes, Monticello, Martel — the quietest streets. Walkable to Greenville Ave (Walk Score ~75). Skip: anything backing 75 / Knox-Henderson. Conservation district. **Mockingbird Elementary feeder = top-tier school anchor**, even though the "feel" is more urban/walkable than lake-centric. Median $865K means $1.1M buys above-median product — expect competition.
-- **Caruth Terrace** &mdash; Small enclave east of Greenville Ave, north of Belmont. **Mockingbird Elementary feeder.** Listings start ~$650K and reach $1M+ for renovated mid-century. 66 DOM = real negotiation room. Recent +36% YoY $/sqft is thin-sample noise — verify against same-block comps. Underrated for Mockingbird zoning at a lower entry than M Streets.
+The only group where the neighborhood name is enough. Spend the most time here.
 
-### Tier A — RISD optionality + lake-adjacent value plays
+- **Hollywood Heights / Santa Monica** &mdash; The standout post-gate. Its entire footprint sits inside a qualifying zone, split roughly Lakewood east / Mockingbird west, so every address clears the location test. $749K median sits right at the $750K floor, so the band opens where the local market already is rather than above it. Look for: Tudor or Craftsman with original details. Skip: anything where the exterior was recently changed without permits (conservation district = clawback risk). 47% YoY $/sqft is a thin-sample yellow flag, so verify with at least 3 same-block comps before paying ask.
 
-Watch closely. Pull the trigger if a strong listing appears.
-- **Moss Farm** &mdash; +26% YoY momentum is real but watch for thin-sample bias. Verify against the dispersion ranking before paying ask. Smaller sub-area (~30 homes), inventory turns over slowly.
-- **Merriman Park Estates** &mdash; 22 DOM = competitive. Don't try to negotiate hard on a fresh listing; either commit fast or pass. Best for renovated mid-century ranches; new construction here is rare.
-- **Casa Linda** &mdash; The undervalued pick. Bryan Adams feeder is the school weakness, but for a 5+ year hold before kindergarten, you're getting Lakewood-orbit walking distance to White Rock Lake at $700K median. Niche #11 in Dallas. If you find a renovated 2,500+ sqft here at $850–950K, that's a genuinely good trade.
-- **Lake Park Estates** *(new addition per critical review)* &mdash; Adjacent to Forest Hills, immediately northeast of White Rock Lake. Mid-century modern, large lots up to 0.5ac. Range $700K–$1.2M+. Same Bryan Adams feeder as Casa Linda but with deeper lake-adjacency and bigger lots. Inventory tight (<15 active typically); strong appreciation. Includes the newer Wyrick Estates / Eastwood Estates pockets.
+### Partially zoned, so the address decides
 
-### Tier B — Top of band buys
+Real inventory here, but the neighborhood name tells you nothing. The watchlist resolves zoning per listing; two homes on facing blocks can land on opposite sides of the gate.
 
-Only with a specific reason.
+- **M Streets / Greenland Hills** &mdash; Best price fit of any strong area: $865K median sits comfortably mid-band, so you are not buying the top of the local market. Mockingbird covers only part of the footprint, which is exactly why per-address zoning matters more here than in Hollywood Heights. Look for: Mercedes, Monticello, Martel, the quietest streets. Walkable to Greenville Ave (Walk Score ~75). Skip: anything backing 75 / Knox-Henderson. Conservation district. Negative YoY (-6.9%) = buyer leverage.
+- **Caruth Terrace** &mdash; Small enclave east of Greenville Ave, north of Belmont. Mostly Mockingbird-zoned, but both active listings in the last snapshot fell *outside* the zone, which is where per-address checking earns its keep. $654K median now sits just under the $750K floor, so entry-level stock is too cheap to qualify: the target is the $750K–$1M renovated mid-century band. 66 DOM = real negotiation room. +36% YoY $/sqft is thin-sample noise, so verify against same-block comps.
+- **Vickery Place** &mdash; Urban-walkable, M Streets-adjacent. Roughly the northern 60% is Mockingbird; the southern remainder splits to Geneva Heights and Lipscomb and fails the gate outright. $1.21M median sits above the ceiling, so what qualifies will be the smaller or less-updated end. +30% YoY is real momentum.
+- **Lakewood Hills** &mdash; North of Mockingbird Ln, south of NW Hwy, east of Abrams. The Lakewood zone covers the southern portion only; the northern strip fails. $1.4M median is well over the ceiling, so only bottom-of-range listings can qualify.
+- **Lakewood Heights** &mdash; Split across both qualifying zones, covering most of its footprint. $1.2M median is above the ceiling, so expect the smaller or less-updated end of its 1930s-original stock.
 
-- **Lake Highlands Estates** &mdash; Use this if RISD becomes a hard requirement. ~$1M median means you're paying full retail for the school zone — fine if that's the explicit reason, less fine if you're emotional about it.
-- **Old Lake Highlands** &mdash; The leverage play. 93 DOM means listings here are tired. Open at 8–10% below ask for anything sitting >75 days. School pattern (Bryan Adams) is the weakness — verify per-address school zone via the DISD lookup tool, not the neighborhood name.
+### Qualifying zoning, priced above the ceiling
 
-### Tier C — RISD-only, top-of-area
+These clear the school gate but not the $1M price rule, so listings will be rare. Keep them for comps and for the occasional original-condition print.
 
-Watch but don't lead with these.
+- **Lakewood proper** &mdash; Almost entirely Lakewood Elementary, so it clears the school gate nearly everywhere. $1.495M–$1.6M median is far above the ceiling. Walking distance to White Rock Lake and Lakewood Country Club; conservation district overlay in some pockets.
+- **Hillside** &mdash; West of White Rock Lake, mostly mid-century ranches built 1951 to the early 1960s, mature trees, serene streetscape. Lakewood covers nearly all of it. $1.3M median is over the ceiling, so an original-condition ranch is the realistic entry.
+- **Wilshire Heights** &mdash; Mostly Mockingbird. $1.5M median is far over the ceiling; kept mainly for the Mockingbird-side comp set. 97% YoY is thin-sample noise.
 
-- **L Streets** &mdash; At $1.1M you're 1.7–2x the area median ($599K). Resale pool is thinner. Only worth it for fully renovated/expanded turnkey on the best streets, with school zone as the explicit driver.
-- **Town Creek** &mdash; Lower entry RISD pocket. You'd be at the top of the local market. Same caveat as L Streets.
+### Qualifying on geography only, via the drawn zone
+
+No school path here. These qualify because of where they sit, so treat the elementary question as unanswered rather than answered.
+
+- **L Streets (drawn Lake Highlands zone)** &mdash; Qualifies on geography alone, independent of schools. It is RISD, so the DISD elementary gate can never pass here. Bounded by Audelia Rd (west), Plano Rd (east), East Northwest Hwy (south), and a line just south of I-635 (north). At $750K–$1M you are 1.3–1.7x the area median ($599K), so the resale pool is thinner than on the Lakewood side. Only worth it for fully renovated or expanded turnkey on the best streets.
+- **Lake Park Estates** &mdash; Hexter-zoned, so it fails the school gate everywhere. Its northwest corner falls inside the drawn zone, and that corner is the entire reason it is still tracked. Mid-century modern, large lots up to 0.5ac. Includes the newer Wyrick Estates / Eastwood Estates pockets that Redfin loosely tags as "Forest Hills."
+- **Lake Highlands Estates** &mdash; RISD, so the elementary gate cannot pass. It sits mostly *west* of Audelia Rd and therefore outside the drawn zone; only its eastern edge qualifies. ~$1.03M median means anything eligible is at the bottom of the local range, so you are paying full retail for a premium LH pocket. Fine as an explicit choice, less fine as an emotional one.
+
+### Watch area
+
+- **Mockingbird Meadows** &mdash; Promoted in relevance by the gate: about half its footprint is Mockingbird-zoned, which the old config did not reflect. $662K median sits just under the $750K floor, so much of the local stock prices below the band. 147 DOM = very slow, which is either a stale market or a hidden opportunity. It is scraped and scored like the primary areas, so anything here that clears the gate surfaces in the lists above on its own.
 
 ## Buy-box hygiene checklist
 
@@ -156,18 +172,18 @@ Run through this for every listing you tour.
 - [ ] **Foundation report mandatory.** North Texas has expansive clay soils (50–70% clay) that swell and shrink. 1940s–1970s East Dallas homes commonly have foundation history. Require a structural engineer report (not just a regular inspector). A $30K foundation issue can be invisible at showing.
 - [ ] **Roof age ≤ 12 years.** Dallas hail events nearly doubled 2022–2024; Texas insurance averages ~$4,380/yr (~85% above national). Old roofs are insurability landmines. Impact-resistant Class 4 shingles are a meaningful underwriting plus.
 - [ ] **FEMA flood zone check.** Use FEMA maps or First Street Flood Factor. Anything in the 100-year floodplain dramatically raises insurance and limits renovation options.
-- [ ] **Confirm school zone for the specific address.** Old Lake Highlands has DISD/RISD boundary splits. Casa Linda and Lake Park Estates are Bryan Adams (DISD). Use https://www.risd.org or https://www.dallasisd.org with the actual address.
-- [ ] **If Hollywood Heights or M Streets:** confirm any planned exterior changes are allowed under the conservation district guidelines. Review board can take 6+ weeks.
+- [ ] **School zoning is already resolved for you.** Every eligible listing carries its resolved elementary, middle and high school, read from the official DISD 2026-27 attendance polygons against the listing's own coordinates. There is no per-address lookup left to do by hand, and the neighborhood feeder labels are not what the gate uses. Two things still need you: (1) any listing flagged `_near_zone_edge`, meaning it sits within 40m of an attendance boundary, needs confirming on DISD SchoolFinder, because rooftop coordinates cannot settle which side of the line a home falls on; (2) RISD zoning inside the drawn Lake Highlands zone is **not** verified against official boundaries, since only DISD polygons are cached. Those listings qualify on geography, so nothing in the gate depends on it, but do not treat the RISD feeder shown as confirmed.
+- [ ] **If Hollywood Heights, M Streets, or a Lakewood proper conservation pocket:** confirm any planned exterior changes are allowed under the conservation district guidelines. Review board can take 6+ weeks.
 - [ ] **Pull last 5 sold within 0.25mi** for a real comp anchor. The Comps tab gives you sub-area level; a quarter-mile radius is what an appraiser will use.
 - [ ] **Tax appraisal vs. asking.** Texas non-disclosure means DCAD's appraised value is an imperfect anchor (often trails market by 10–25% due to caps and protests), but a >40% premium over appraised value warrants a "what changed?" conversation.
 - [ ] **Property tax protest history.** Pull the parcel's protest record. A house that's been successfully protested down has lower carry cost; one that hasn't may have room you can capture.
-- [ ] **Drive-by at 7am, 5pm, and 9pm.** Noise pockets, traffic flow, neighbor parking, ambient activity don't show up on Zillow. Especially important for anything inside one block of Garland Rd, Skillman, Mockingbird, NW Hwy.
+- [ ] **Drive-by at 7am, 5pm, and 9pm.** Noise pockets, traffic flow, neighbor parking, ambient activity don't show up on Zillow. Especially important for anything inside one block of Mockingbird Ln, NW Hwy, Abrams, Greenville Ave, Audelia or Plano Rd.
 - [ ] **Listing agent owner-motivation question.** "Why is the seller moving and what's their timeline?" Ask in the first call, not the offer.
-- [ ] **ForwardDallas zoning check.** The 2024 ForwardDallas plan allows more "missing middle" housing (duplexes, ADUs) in historically single-family zones. Most established conservation districts are protected, but Tier B/C areas without historic-district status could see density changes. Check the parcel's zoning classification on the city's plan.
+- [ ] **ForwardDallas zoning check.** The 2024 ForwardDallas plan allows more "missing middle" housing (duplexes, ADUs) in historically single-family zones. Established conservation districts like Hollywood Heights and M Streets are largely protected, but areas without conservation or historic-district status, the Lake Highlands-side pockets in particular, could see density changes. Check the parcel's zoning classification on the city's plan.
 
 ## How to use this tracker
 
-- **Daily:** Open the Watchlist tab. Top 30 are pre-ranked by score. Anything new at the top, look at within 24 hours.
+- **Daily:** Open the Watchlist tab. Everything on it has already cleared the gate, pre-ranked by score, top 30 shown. Anything new at the top, look at within 24 hours. Check the near-miss list under it as well: those failed on location alone and are ranked by how far they sit from the boundary.
 - **Weekly:** Open the Comps tab on Sunday after the weekly sold scrape. Any new comps in your target sub-areas? Update your mental anchor for asking-price reasonableness.
 - **Monthly:** Look at the Sub-area scorecards tab. Has the buy-box capture rate moved? Has $/sqft IQR widened (more dispersion = more opportunity)?
 - **When something hits:** Use the Map tab to see what else is nearby in your price band, drive the area at varied times, run through the hygiene checklist before offering.
@@ -175,6 +191,7 @@ Run through this for every listing you tour.
 ## Calibration & caveats
 
 - **Texas non-disclosure** &mdash; Sale prices in this dashboard come from MLS via Redfin, not DCAD. Trust the Redfin data; DCAD has appraised values, which are not sale prices.
-- **Bounding boxes are rough rectangles** &mdash; A few listings on this map are technically in a different sub-area than the one they're tagged with. Use the Sub_area column as a coarse filter and verify the actual neighborhood via the address.
+- **Bounding boxes are rough rectangles** &mdash; A few listings are technically in a different sub-area than the one they're tagged with. Those rectangles now only drive scraping and labeling, never eligibility, so the imprecision costs you a label rather than a qualification. Eligibility uses real polygons: the DISD attendance boundaries and the traced outline of the drawn Lake Highlands zone.
+- **Schools are a gate, not a weight** &mdash; A listing that fails the elementary or drawn-zone test never reaches the lists above, so there is no "good area, bad schools" trade left to make here. The 10% school weight only separates verified Mockingbird/Lakewood zoning from drawn-zone-only qualification.
 - **Thin samples on appreciation** &mdash; Areas like Hollywood Heights show 47% YoY $/sqft, which is real signal, but each percentage point comes from only a handful of closings. Don't size up a bid based on the YoY alone.
-- **The score is a tool, not a verdict.** It helps rank 109 listings into 30 worth opening. The final 5 you actually tour deserve human judgment.
+- **The score is a tool, not a verdict.** The gate does the culling now, and it cuts hard: most of what gets scraped never makes it here. The handful you actually tour deserve human judgment.

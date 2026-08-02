@@ -47,6 +47,16 @@ jobs:
             echo "mode=daily" >> "$GITHUB_OUTPUT"
           fi
 
+      # The eligibility gate reads cached DISD attendance polygons, and DISD
+      # redraws them annually. Without this the gate would silently score
+      # against stale boundaries for months. --refresh only overwrites the cache
+      # when every allowlisted zone comes back, so a DISD outage or a renamed
+      # school leaves the good file in place and this step just fails soft.
+      - name: Refresh DISD school zones (weekly only)
+        if: steps.mode.outputs.mode == 'weekly' || steps.mode.outputs.mode == 'manual'
+        continue-on-error: true
+        run: python -m scrapers.school_zones --refresh
+
       - name: Scrape active listings (Redfin)
         run: python -m scrapers.redfin --status active
 
@@ -69,7 +79,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
+          # school_zones.geojson is included so an annual boundary redraw is
+          # captured in history alongside the snapshot it first affected.
+          git add data/ config/school_zones.geojson
           if git diff --cached --quiet; then
             echo "No data changes to commit."
             exit 0

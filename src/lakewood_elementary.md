@@ -46,26 +46,47 @@ import L from "npm:leaflet";
 
 # Lakewood Elementary feeder
 
-Active listings and recent sold comps restricted to sub-areas that feed **Lakewood Elementary** (DISD's strongest elementary, paired with J.L. Long MS and Woodrow Wilson HS). Seven sub-areas qualify: Forest Hills, Hollywood Heights / Santa Monica, Lakewood proper, Lakewood Hills, Hillside, Lakewood Heights *(partial)*, and Junius Heights / Peak's Suburban / Munger Place *(partial)* — verify per address on the DISD school locator for the partial feeders.
+Active listings and recent sold comps whose **address** falls inside the official **Lakewood Elementary** attendance boundary (DISD's strongest elementary, paired with Long MS and Wilson HS).
+
+Membership is resolved per address against the DISD 2026-27 boundary polygon, **not** by asking which sub-areas are labeled Lakewood feeders. That label was wrong: Forest Hills carried it and is entirely Hexter. A sub-area appears below only because a listing in it actually resolved into the zone, and partially-zoned areas contribute only their qualifying streets rather than all of them.
 
 ```js
 const watchlist = await FileAttachment("data/watchlist.json").json();
 const sold = await FileAttachment("data/sold.json").json();
 const subAreas = await FileAttachment("data/sub_areas.json").json();
+const schoolZones = await FileAttachment("data/school_zones.json").json();
 ```
 
 ```js
-// Sub-areas whose feeder_pattern includes "Lakewood Elementary"
-const LAKEWOOD_ELEM_IDS = new Set(
-  subAreas.sub_areas
-    .filter(a => (a.feeder_pattern || "").includes("Lakewood Elementary"))
-    .map(a => a.id)
-);
-const LAKEWOOD_ELEM_AREAS = subAreas.sub_areas.filter(a => LAKEWOOD_ELEM_IDS.has(a.id));
-const areaName = new Map(LAKEWOOD_ELEM_AREAS.map(a => [a.id, a.name]));
+const LAKEWOOD_ELEM = "Lakewood Elementary School";
 
-const activeAll = (watchlist.listings || []).filter(d => LAKEWOOD_ELEM_IDS.has(d.sub_area_id));
-const soldAll = (sold.listings || []).filter(d => LAKEWOOD_ELEM_IDS.has(d.sub_area_id));
+// Zoning is resolved at ingest (scrapers/redfin.py) and again by the scorer, so
+// both active and sold carry it. `_elementary` is the scorer's value on eligible
+// listings; `elementary` is the ingest value present on every row.
+const inLakewoodZone = d => (d._elementary ?? d.elementary) === LAKEWOOD_ELEM;
+
+const activeAll = (watchlist.listings || []).filter(inLakewoodZone);
+const soldAll = (sold.listings || []).filter(inLakewoodZone);
+
+// Sub-area names for display only. Derived from what the data actually contains,
+// so an area shows up because a listing resolved into the zone, never because of
+// a feeder label.
+const areaName = new Map([
+  ...subAreas.sub_areas.map(a => [a.id, a.name]),
+  ...(subAreas.watch_areas || []).map(a => [a.id, a.name])
+]);
+const contributingAreaIds = new Set(
+  [...activeAll, ...soldAll].map(d => d.sub_area_id).filter(Boolean)
+);
+const LAKEWOOD_ELEM_AREAS = [
+  ...subAreas.sub_areas,
+  ...(subAreas.watch_areas || [])
+].filter(a => contributingAreaIds.has(a.id));
+
+const lakewoodZoneFeature = {
+  type: "FeatureCollection",
+  features: (schoolZones.features || []).filter(f => f.properties.ELEM_DESC === LAKEWOOD_ELEM)
+};
 
 // Parse Redfin "Month-DD-YYYY" sold_date into a real Date
 function parseSoldDate(s) {
@@ -180,11 +201,18 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
     subdomains: "abcd"
   }).addTo(map);
 
-  // Sub-area outlines + permanent name labels for context
+  // The actual attendance boundary. Every comp plotted here resolved inside it,
+  // so this outline is the page's membership test made visible.
+  L.geoJSON(lakewoodZoneFeature, {
+    color: "#16a34a", weight: 2.5, opacity: 0.9, fillColor: "#16a34a", fillOpacity: 0.07
+  }).bindTooltip("Lakewood Elementary attendance boundary (DISD 2026-27)", { sticky: true }).addTo(map);
+
+  // Sub-area outlines + permanent name labels, for orientation only.
   for (const a of LAKEWOOD_ELEM_AREAS) {
     const bb = a.bbox;
+    if (!bb) continue;
     L.rectangle([[bb.sw_lat, bb.sw_lng], [bb.ne_lat, bb.ne_lng]], {
-      color: "#6b7280", weight: 1, opacity: 0.55, fill: false, dashArray: "3,4"
+      color: "#6b7280", weight: 1, opacity: 0.4, fill: false, dashArray: "3,4"
     }).addTo(map);
 
     const labelLat = (bb.sw_lat + bb.ne_lat) / 2;
@@ -259,17 +287,26 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
 
 ## Sub-area rollup (Lakewood Elementary only)
 
+Counts cover **only the addresses that resolved into the zone**, so a partially-zoned area contributes its qualifying streets and nothing else. The "in zone" column is that share of the area's total scraped inventory: 100% means the whole footprint sits inside the boundary, a low number means most of the area is zoned elsewhere and the rest of the dashboard will treat it very differently.
+
 ```js
 {
   const feederPpsfs = soldAll.map(d => d.ppsf_usd).filter(Boolean);
   const feederMedianPpsf = feederPpsfs.length ? d3.median(feederPpsfs) : null;
 
+  // Denominator is every scraped row in the area, zoned or not, so the share is
+  // "how much of this neighborhood is actually Lakewood-fed".
+  const allRows = [...(watchlist.listings || []), ...(watchlist.excluded || []), ...(sold.listings || [])];
+
   const rows = LAKEWOOD_ELEM_AREAS.map(a => {
     const soldHere = soldAll.filter(d => d.sub_area_id === a.id && d.ppsf_usd);
     const activeHere = activeAll.filter(d => d.sub_area_id === a.id);
+    const totalHere = allRows.filter(d => d.sub_area_id === a.id).length;
+    const inZoneHere = allRows.filter(d => d.sub_area_id === a.id && inLakewoodZone(d)).length;
     return {
       sub_area: a.name,
       tier: a.tier,
+      share_in_zone: totalHere ? inZoneHere / totalHere : null,
       n_sold: soldHere.length,
       median_sold_price: soldHere.length ? Math.round(d3.median(soldHere, d => d.price_usd)) : null,
       median_ppsf: soldHere.length ? Math.round(d3.median(soldHere, d => d.ppsf_usd)) : null,
@@ -279,10 +316,11 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
   }).sort((a, b) => d3.descending(a.n_sold, b.n_sold));
 
   display(Inputs.table(rows, {
-    columns: ["sub_area", "tier", "n_sold", "median_sold_price", "median_ppsf", "n_active", "median_active_price"],
+    columns: ["sub_area", "tier", "share_in_zone", "n_sold", "median_sold_price", "median_ppsf", "n_active", "median_active_price"],
     header: {
       sub_area: "Sub-area",
       tier: "Tier",
+      share_in_zone: "In zone",
       n_sold: "Sold (n)",
       median_sold_price: "Median sold",
       median_ppsf: "$/sqft",
@@ -292,6 +330,17 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
     format: {
       median_sold_price: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
       median_active_price: v => v ? `$${(v/1000).toFixed(0)}k` : "—",
+      share_in_zone: v => {
+        if (v == null) return "—";
+        const pct = Math.round(v * 100);
+        // Green at fully-zoned, gray in the middle, amber when most of the area
+        // is zoned elsewhere and the sub-area name is a poor proxy for the zone.
+        const color = v >= 0.95 ? "#16a34a" : v >= 0.5 ? "#737373" : "#b45309";
+        const tip = v >= 0.95
+          ? "Entire footprint is inside the Lakewood Elementary boundary"
+          : `Only ${pct}% of scraped inventory here is Lakewood-zoned; the rest feeds another elementary`;
+        return html`<span style="color: ${color}; font-weight: 600;" title=${tip}>${pct}%</span>`;
+      },
       median_ppsf: v => {
         if (!v) return "—";
         if (!feederMedianPpsf) return `$${v}`;
@@ -303,10 +352,12 @@ const mapDiv = display(html`<div style="height: 520px; border-radius: 4px; borde
       }
     },
     rows: 20,
-    width: { sub_area: 220, tier: 50 }
+    width: { sub_area: 200, tier: 50, share_in_zone: 70 }
   }));
 }
 ```
+
+> **How to read it.** A green "In zone" means the sub-area name is a safe shorthand for the school zone. Amber means it is not, and you should treat that row as "the Lakewood-zoned streets within this area" rather than as the neighborhood. Median $/sqft is colored against the feeder-wide median, so green is relatively cheap for Lakewood-zoned stock specifically, not cheap for Dallas.
 
 ## Active listing map
 
@@ -338,11 +389,19 @@ const activeMapDiv = display(html`<div style="height: 520px; border-radius: 4px;
       subdomains: "abcd"
     }).addTo(map);
 
-    // Sub-area outlines + labels (same overlays as the sold map)
+    // The actual attendance boundary, drawn first so markers sit on top. This is
+    // the real membership test for this page; the sub-area rectangles below are
+    // only orientation and several extend well outside it.
+    L.geoJSON(lakewoodZoneFeature, {
+      color: "#16a34a", weight: 2.5, opacity: 0.9, fillColor: "#16a34a", fillOpacity: 0.07
+    }).bindTooltip("Lakewood Elementary attendance boundary (DISD 2026-27)", { sticky: true }).addTo(map);
+
+    // Sub-area outlines + labels, for orientation only.
     for (const a of LAKEWOOD_ELEM_AREAS) {
       const bb = a.bbox;
+      if (!bb) continue;
       L.rectangle([[bb.sw_lat, bb.sw_lng], [bb.ne_lat, bb.ne_lng]], {
-        color: "#6b7280", weight: 1, opacity: 0.55, fill: false, dashArray: "3,4"
+        color: "#6b7280", weight: 1, opacity: 0.4, fill: false, dashArray: "3,4"
       }).addTo(map);
       const labelLat = (bb.sw_lat + bb.ne_lat) / 2;
       const labelLng = (bb.sw_lng + bb.ne_lng) / 2;
