@@ -87,14 +87,38 @@ LOG = logging.getLogger("score")
 # constant (a 3.8-point spread across the eligible set). `ppsf_vs_peers` rises to
 # 30% and its formula is widened below: it is the actual value signal and was
 # contributing 3.5 points.
+# Revised again 2026-08-03 to answer the question actually being asked: "is this a
+# nice house I should go look at?" The previous set still failed that. Measured
+# across the eligible listings, its strongest correlate was days_on_market
+# (r = +0.54), so a house that had sat 114 days in a market turning in 24 ranked
+# first; its second was year_built (r = +0.51), which put 2016-2025 spec builds on
+# top and a 1926 M Streets home at rank 17. Square footage was not a component at
+# all, and lot_size correlated NEGATIVELY (-0.42) with the score despite carrying
+# 20% weight.
+#
+# Calibrated for "character home on a real lot": lot and period character lead,
+# value still matters, raw size and bathroom count are secondary, and the tall
+# subdivided new-build archetype has to be genuinely excellent elsewhere to rank.
+# School zoning is gone entirely -- the gate guarantees it, so scoring it again
+# only docked the Lake Highlands zone for qualifying on geography.
 WEIGHTS = {
-    "ppsf_vs_peers": 0.30,
-    "lot_size": 0.20,
-    "dom_leverage": 0.15,
-    "vintage": 0.15,
-    "schools": 0.10,
-    "price_fit": 0.10,
+    "lot_size": 0.30,
+    "character": 0.25,
+    "ppsf_vs_peers": 0.20,
+    "bath_adequacy": 0.10,
+    "size": 0.10,
+    "price_fit": 0.05,
 }
+
+# Absolute anchors, deliberately not percentiles of the current batch, so a score
+# means the same thing next week as it does today. Calibrated to the observed
+# distribution across all scraped rows: lots p5 4,182 / p50 8,364 / p95 11,979.
+LOT_FLOOR_SQFT = 4_000      # subdivided spec lot: no credit
+LOT_TARGET_SQFT = 12_000    # full credit
+SQFT_FLOOR = 1_500
+SQFT_TARGET = 3_500
+BATHS_PER_BED_FLOOR = 0.45  # roughly 3bd/1.5ba
+BATHS_PER_BED_TARGET = 1.0  # a bath per bedroom
 
 # Peer-comp window for size-normalized $/sqft comparison.
 PEER_SQFT_WINDOW = 0.25  # +/- 25%
@@ -542,20 +566,11 @@ def score_listing(
     buy_box: dict,
     loc: dict,
 ) -> dict:
+    # Reported as context only; neither affects the score. Location is settled by
+    # the gate, and school zoning by the allowlist. Ranking either again would
+    # penalise a home for where it is after the gate already said the location is
+    # acceptable -- which is what buried the Lake Highlands zone.
     sub_orbit = float(area_meta.get("lakewood_orbit", 0.0))
-
-    # School credit comes from the *resolved* zone, not the sub-area's
-    # school_quality_score. Those config numbers were derived from feeder_pattern
-    # strings that turned out to be wrong in several areas. Everything scored
-    # here has already passed the gate, so this only separates the two bases:
-    # confirmed Mockingbird/Lakewood zoning outranks "inside the drawn zone",
-    # where RISD zoning is real but unverified against official boundaries.
-    if loc.get("basis") == "elementary_zone":
-        school_score = 1.0
-    elif loc.get("basis") == "focus_zone":
-        school_score = 0.9
-    else:
-        school_score = float(area_meta.get("school_quality_score", 0)) / 10.0
 
     price = li.get("price_usd") or 0
     price_min = buy_box["price_min_usd"]
@@ -584,46 +599,68 @@ def score_listing(
         # No baseline (thin peer set, missing $/sqft): neutral, same as on-baseline.
         ppsf_vs = 0.5
 
-    dom = li.get("days_on_market") or 0
-    dom_leverage = min(1.0, dom / 90.0)
-
-    yb = li.get("year_built") or 0
-    if yb >= 2010:
-        vintage = 1.0
-    elif yb >= 1990:
-        vintage = 0.75
-    elif yb >= 1970:
-        vintage = 0.55
-    elif yb >= 1950:
-        vintage = 0.4
-    elif yb > 0:
-        vintage = 0.25
-    else:
-        vintage = 0.4
-
+    # Lot size. Calibrated to the actual distribution in this screen (p5 4,182
+    # sqft, p50 8,364, p95 11,979), so it discriminates across the range that
+    # really occurs instead of saturating. The old thresholds put the median lot
+    # at 0.65 and everything from 10,000 up at 0.85+, compressing the top.
+    # A 3,000-4,000 sqft subdivided spec lot scores 0.
     lot = li.get("lot_size_sqft") or 0
-    if lot >= 14000:
-        lot_size = 1.0
-    elif lot >= 10000:
-        lot_size = 0.85
-    elif lot >= 8000:
-        lot_size = 0.65
-    elif lot >= 5000:
-        lot_size = 0.4
-    elif lot > 0:
-        lot_size = 0.2
-    else:
-        lot_size = 0.4
+    lot_size = min(1.0, max(0.0, (lot - LOT_FLOOR_SQFT) / (LOT_TARGET_SQFT - LOT_FLOOR_SQFT))) if lot else 0.3
 
-    # Note lakewood_orbit is deliberately absent: see the WEIGHTS comment. It is
-    # still reported in components below as neighborhood context, but it no longer
-    # moves the score.
+    # Period character. 1946-1965 is 45% of this market -- the Lakewood and Lake
+    # Highlands ranch stock -- and pre-war Tudor/Craftsman/Prairie is the prize in
+    # the conservation districts. 1966-1990 is the weakest era here. New build
+    # scores modestly: turnkey, but not what this screen is shopping for.
+    yb = li.get("year_built") or 0
+    if not yb:
+        character = 0.4
+    elif yb <= 1945:
+        character = 1.0
+    elif yb <= 1965:
+        character = 0.75
+    elif yb <= 1990:
+        character = 0.25
+    else:
+        character = 0.45
+
+    # Absolute anchors, not batch-relative, so scores stay comparable run to run.
+    sqft = li.get("sqft") or 0
+    size = min(1.0, max(0.0, (sqft - SQFT_FLOOR) / (SQFT_TARGET - SQFT_FLOOR))) if sqft else 0.3
+
+    # Baths relative to beds. Across the eligible set this runs 0.50 to 1.17, so a
+    # 3bd/2ba sits near the bottom and a 3bd/3.5ba near the top. Deliberately only
+    # 10%: a character home with two baths should still outrank a spec box with
+    # four.
+    beds = li.get("beds") or 0
+    baths = li.get("baths") or 0
+    if beds and baths:
+        per_bed = baths / beds
+        bath_adequacy = min(1.0, max(0.0, (per_bed - BATHS_PER_BED_FLOOR) /
+                                     (BATHS_PER_BED_TARGET - BATHS_PER_BED_FLOOR)))
+    else:
+        bath_adequacy = 0.3
+    # Days on market is NOT scored. It was the strongest single correlate of the
+    # old score (r = +0.54), which meant a listing sitting 114 days in a market
+    # turning in 24 ranked first -- staleness reading as quality. It is classified
+    # into an action flag instead and surfaced beside the score.
+    dom = li.get("days_on_market")
+    if dom is None:
+        dom_flag = "unknown"
+    elif dom <= 14:
+        dom_flag = "fresh"        # move fast, expect competition
+    elif dom < 60:
+        dom_flag = "normal"
+    elif dom < 90:
+        dom_flag = "slow"         # some negotiating room
+    else:
+        dom_flag = "stale"        # find out WHY before assuming a bargain
+
     raw = (
-        WEIGHTS["ppsf_vs_peers"] * ppsf_vs
-        + WEIGHTS["lot_size"] * lot_size
-        + WEIGHTS["dom_leverage"] * dom_leverage
-        + WEIGHTS["vintage"] * vintage
-        + WEIGHTS["schools"] * school_score
+        WEIGHTS["lot_size"] * lot_size
+        + WEIGHTS["character"] * character
+        + WEIGHTS["ppsf_vs_peers"] * ppsf_vs
+        + WEIGHTS["bath_adequacy"] * bath_adequacy
+        + WEIGHTS["size"] * size
         + WEIGHTS["price_fit"] * price_fit
     )
     busy = busy_street_assessment(li)
@@ -633,6 +670,7 @@ def score_listing(
         raw -= 0.05  # 5-point hit
     return {
         "score": round(max(0.0, raw) * 100, 1),
+        "dom_flag": dom_flag,
         "busy_street": busy["busy_street"],
         "busy_address_on": busy["busy_address_on"],
         "busy_proximity": busy["busy_proximity"],
@@ -641,13 +679,14 @@ def score_listing(
         "ppsf_baseline": ppsf_baseline,
         "ppsf_baseline_source": ppsf_baseline_source,
         "components": {
-            "lakewood_orbit": round(sub_orbit, 2),
-            "schools": round(school_score, 2),
-            "price_fit": round(price_fit, 2),
-            "ppsf_vs_peers": round(ppsf_vs, 2),
-            "dom_leverage": round(dom_leverage, 2),
-            "vintage": round(vintage, 2),
             "lot_size": round(lot_size, 2),
+            "character": round(character, 2),
+            "ppsf_vs_peers": round(ppsf_vs, 2),
+            "bath_adequacy": round(bath_adequacy, 2),
+            "size": round(size, 2),
+            "price_fit": round(price_fit, 2),
+            # Context only, not scored:
+            "lakewood_orbit": round(sub_orbit, 2),
         },
     }
 
@@ -803,6 +842,7 @@ def main() -> int:
             "_zone_edge_m": round(edge_m) if edge_m != float("inf") else None,
             "_nearest_gate_zone": edge_zone,
             "_unmapped_sub_area": area_meta.get("name") == "(unmapped)",
+            "_dom_flag": result["dom_flag"],
             "_busy_street": result["busy_street"],
             "_busy_address_on": result["busy_address_on"],
             "_busy_proximity": result["busy_proximity"],

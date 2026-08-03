@@ -11,7 +11,9 @@ import L from "npm:leaflet";
 
 Every listing here has cleared a **hard eligibility gate**: price inside the buy box, 3+ bedrooms, 2+ bathrooms, and either zoned to **Mockingbird or Lakewood Elementary** or sitting inside the **drawn Lake Highlands zone**. Anything failing one of those is excluded outright rather than merely down-ranked.
 
-Survivors are ranked on **the house, not the neighborhood** — location is already settled by the gate, and all three qualifying bases count equally. Weights: $/sqft vs. peers 30%, lot size 20%, DOM leverage 15%, vintage 15%, school confidence 10%, price position 10%. Busy-street listings are flagged ⚠ and lose 5 points.
+Survivors are ranked on **the house, not the neighborhood** — location is already settled by the gate, and all three qualifying bases count equally. The score answers one question: *is this a character home on a real lot, at a fair price?* Weights: lot size 30%, period character 25%, $/sqft vs. peers 20%, baths per bedroom 10%, size 10%, price position 5%.
+
+**Deal signals are kept out of the score** and shown beside it: days on market, busy-street exposure ⚠, and zone-edge proximity ⚑. Those tell you how to *approach* a house, not whether it's a good one.
 
 Zoning is resolved **per address** from the listing's own coordinates against all 135 official Dallas ISD elementary attendance polygons, not from neighborhood feeder labels. Those labels were wrong in several areas.
 
@@ -148,7 +150,26 @@ Inputs.table(top, {
       return html`<span style="color: ${ppsfColor(diff)}; font-weight: 600;" title=${tip}>$${v}</span>`;
     },
     sqft: v => v?.toLocaleString() ?? "—",
-    lot_size_sqft: v => v?.toLocaleString() ?? "—"
+    lot_size_sqft: (v, i, data) => {
+      if (!v) return "—";
+      // Lot drives 30% of the score, so make the good ones visible at a glance.
+      const color = v >= 9000 ? "#16a34a" : v >= 6000 ? "#737373" : "#b45309";
+      const tip = v >= 9000 ? "Generous lot for this market (top quartile)"
+        : v >= 6000 ? "Typical lot" : "Small lot — often a subdivided spec build";
+      return html`<span style="color: ${color}; font-weight: 600;" title=${tip}>${v.toLocaleString()}</span>`;
+    },
+    days_on_market: (v, i, data) => {
+      const f = data[i]._dom_flag;
+      // Deal signal, deliberately NOT part of the score. Long DOM used to be
+      // rewarded, which put a 114-day listing at #1; it is context for how to
+      // approach the house, not evidence the house is good.
+      const style = { fresh: ["#dc2626", "move fast, expect competition"],
+                      normal: ["#737373", "unremarkable time on market"],
+                      slow: ["#b45309", "some negotiating room"],
+                      stale: ["#7c3aed", "find out WHY before assuming a bargain"],
+                      unknown: ["#737373", "no DOM reported"] }[f] ?? ["#737373", ""];
+      return html`<span style="color: ${style[0]}; font-weight: 600;" title=${style[1]}>${v ?? "—"}${f === "stale" ? " ⚑" : ""}</span>`;
+    }
   },
   rows: 30,
   width: {
@@ -171,10 +192,12 @@ Inputs.table(top, {
 
 > **Key takeaways**
 >
-> - There is no sqft floor. Beds and baths carry the size requirement, so small-but-qualifying homes now appear.
-> - **Zone** in green = verified Mockingbird or Lakewood attendance zone. Gray "LH zone" = qualifies on geography only; it is RISD, so the elementary gate does not apply. Hover for the full feeder pattern.
-> - A ⚑ next to the zone means the listing sits within 40m of an attendance boundary. Rooftop coordinates cannot settle which side it is on — confirm on DISD SchoolFinder before touring.
-> - $/sqft cell color is relative to the peer baseline: green = ≥10% under, gray = at, red = ≥10% over. Hover for the exact percent and anchor.
+> - **The score ranks the house, not the location.** All three qualifying bases count equally, so a Lake Highlands home is not docked for being in Lake Highlands. Rank differences come from lot, character, price per foot and layout.
+> - **Lot** is 30% of the score and color-coded: green ≥9,000 sqft, amber <6,000 (usually a subdivided spec build). **Yr** matters almost as much — pre-1945 scores highest, 1966–90 lowest.
+> - **DOM is not scored.** Red = fresh, so expect competition. Purple ⚑ = 90+ days: in a market turning in 24, that usually means something is wrong with the house, so find out what before treating it as a bargain.
+> - There is no sqft floor. Beds and baths carry the size requirement, so small-but-qualifying homes appear.
+> - **Zone** in green = verified Mockingbird or Lakewood attendance zone. Gray "LH zone" = qualifies on geography; it is RISD, so the elementary gate does not apply. A ⚑ there means within 40m of an attendance boundary — confirm on DISD SchoolFinder before touring.
+> - $/sqft color is relative to the size-matched peer baseline: green = ≥10% under, red = ≥10% over. Hover for the exact percent and anchor.
 
 ## Near misses
 
@@ -344,17 +367,21 @@ Applied only to listings that already passed the gate.
 
 | Component | Weight | What it measures |
 |---|---:|---|
-| $/sqft vs. peers | 30% | **Size-normalized**: compares to sold comps in same sub-area within ±25% sqft. Full credit at 25% under peers, neutral on baseline, zero at 25% over. Falls back to area median if peer set <3. |
-| Lot size | 20% | Bigger lots — meaningful in Dallas where lot premiums diverge sharply |
-| DOM leverage | 15% | Longer-on-market = more negotiation room |
-| Vintage | 15% | Newer build = more turnkey, less maintenance |
-| School confidence | 10% | Verified Mockingbird/Lakewood zoning = full credit; drawn-zone-only = 0.9. Not school *quality* — the gate already guaranteed that. This is how certain the zoning claim is. |
-| Price position | 10% | Full credit mid-band, tapering toward the $750K and $1M edges |
+| Lot size | 30% | Land. Calibrated to this market: 4,000 sqft (a subdivided spec lot) scores zero, 12,000 scores full. Median here is 8,364. |
+| Period character | 25% | Pre-1945 Tudor/Craftsman/Prairie = full credit. 1946–65 mid-century ranch = 0.75, and that's 45% of this market. 1966–90 = 0.25, the weakest era locally. 1991+ = 0.45: turnkey, but not what this screen is shopping for. |
+| $/sqft vs. peers | 20% | **Size-normalized**: sold comps in the same sub-area within ±25% sqft. Full credit at 25% under peers, neutral on baseline, zero at 25% over. Falls back to area median if peer set <3. |
+| Baths per bedroom | 10% | Livability. Runs 0.50 to 1.17 across the current set. Small on purpose — a two-bath character home should still beat a four-bath spec box. |
+| Size | 10% | Raw square footage, 1,500 → 3,500. Secondary by choice: the bigger houses here are mostly new builds on small lots. |
+| Price position | 5% | Full credit mid-band, tapering toward the $750K and $1M edges. Near-constant, since the gate already enforces the band. |
 | Busy-street flag | -5pt | Soft penalty for Garland Rd, Buckner, Skillman, Abrams, Mockingbird, NW Hwy, Plano Rd, Walnut Hill, Forest Ln, Greenville Ave, Audelia, Royal Ln |
 
-**Where did Lakewood-orbit go?** It used to carry 30% and was supplying 36% of the score's entire discriminating power. That made sense when the screen spanned 20 areas and location was the open question. Once the gate decided location, it charged the same preference twice: it pushed the drawn Lake Highlands zone into the bottom four ranks by construction, and it docked Junius Heights 13.5 points for feeder uncertainty the per-address gate now resolves outright. Two homes with identical Lakewood Elementary zoning could sit five ranks apart on neighborhood label alone. So location left the score. `lakewood_orbit` is still reported per listing as context; it just no longer moves the number.
+**What this score deliberately ignores.** Two things used to dominate it and both were misleading:
 
-`price_fit` and `school confidence` are deliberately small: the gate already enforces both, so they can only ever move a point or two. The work is done by $/sqft, lot, DOM and vintage — the things that still genuinely vary once every listing is somewhere you would live.
+- **Days on market** was the strongest single correlate (r = +0.54), so a listing that had sat 114 days in a market turning in 24 ranked first. Staleness was reading as quality. It's now a flag in the DOM column: red = fresh, purple ⚑ = 90+ days, meaning find out *why* before assuming a bargain.
+- **Lakewood-orbit** carried 30% and supplied 36% of all discriminating power. Once the gate decided location, scoring it again charged the same preference twice: it buried the drawn Lake Highlands zone in the bottom four ranks by construction and docked Junius Heights 13.5 points for feeder uncertainty the gate now resolves outright. It's still reported per listing as context but no longer moves the number.
+- **School zoning** is gone from the score too. The gate guarantees it, so ranking it again only penalized Lake Highlands homes for qualifying on geography rather than on a DISD boundary.
+
+The old set also never scored square footage at all, and its `lot_size` correlated **negatively** with the score despite carrying 20% weight. After this revision: DOM correlation +0.09 (neutral), lot +0.41, year built −0.60 (older = better). One honest side effect — because the character stock here sits on bigger lots but is smaller, square footage now correlates mildly negative (−0.26). That's the trade this weighting makes on purpose.
 
 **Why size-normalized $/sqft?** Larger homes price at lower $/sqft as a baseline (fixed costs spread across more sqft). The previous "vs. area median" rule fired on every 4,000 sqft listing in a 2,000-sqft-typical neighborhood, generating false-positive "hidden value" flags. The peer-comp rule now compares apples to apples. Peer baselines are drawn from **all** scraped listings, including ones that fail the gate: a $1.3M neighbor is still a valid comp even though it can never be a buy.
 
