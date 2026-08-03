@@ -39,13 +39,16 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import json
 import logging
 import sys
 from typing import Iterable
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from .school_zones import lookup as lookup_school_zone
 from .utils import (
+    DATA_ROOT,
     DEFAULT_HEADERS,
     RateLimiter,
     SubArea,
@@ -93,26 +96,44 @@ UNIT_SUFFIX_RE = _re.compile(
 )
 
 
-def fetch_bbox(
-    bbox,
-    status: str,
-    min_price: int,
-    max_price: int,
-    rate: RateLimiter,
-) -> list[dict]:
-    """Hit the Redfin gis-csv endpoint for one bbox and return parsed rows.
+def _poly_param(area: SubArea) -> str:
+    """Build Redfin's `poly` value for one area.
 
     Redfin's gis-csv endpoint requires a closed polygon via `poly=`, not the
-    `min_lat/max_lat/min_lng/max_lng` form. Polygon points are "lng lat" order,
+    `min_lat/max_lat/min_lng/max_lng` form. Points are "lng lat" order,
     comma-separated, with the final point repeating the first to close the loop.
+
+    Since the endpoint takes an arbitrary polygon, an area carrying a traced
+    outline is scraped on that outline rather than on its bounding box. For the
+    drawn Lake Highlands zone this matters: its bbox includes a wedge north of
+    I-635 that the outline excludes, so bbox-based scraping would pull listings
+    from the wrong side of the freeway only to have the gate discard them.
     """
-    poly = (
+    if area.polygon is not None:
+        ring = list(area.polygon.exterior)
+        if ring[0] != ring[-1]:
+            ring = ring + [ring[0]]
+        return ",".join(f"{lng} {lat}" for lng, lat in ring)
+
+    bbox = area.bbox
+    return (
         f"{bbox.sw_lng} {bbox.sw_lat},"     # SW
         f"{bbox.ne_lng} {bbox.sw_lat},"     # SE
         f"{bbox.ne_lng} {bbox.ne_lat},"     # NE
         f"{bbox.sw_lng} {bbox.ne_lat},"     # NW
         f"{bbox.sw_lng} {bbox.sw_lat}"      # close
     )
+
+
+def fetch_area(
+    area: SubArea,
+    status: str,
+    min_price: int,
+    max_price: int,
+    rate: RateLimiter,
+) -> list[dict]:
+    """Hit the Redfin gis-csv endpoint for one area and return parsed rows."""
+    poly = _poly_param(area)
     params = {
         "al": "1",
         "market": "dallas",
@@ -148,11 +169,24 @@ def fetch_bbox(
 
 
 def normalize(row: dict, areas: Iterable[SubArea]) -> dict:
-    """Pull the columns we care about and assign a sub-area."""
+    """Pull the columns we care about, assign a sub-area, and resolve zoning.
+
+    Elementary zoning is resolved here rather than only in the scorer because it
+    is a property of the address, so sold comps need it too. Without it, any view
+    restricted to a school zone (the Lakewood Elementary page) has to infer the
+    feeder from sub-area labels, which is exactly the unreliable shortcut the
+    gate exists to avoid.
+    """
     lat = _safe_float(row.get("LATITUDE"))
     lng = _safe_float(row.get("LONGITUDE"))
     sub_area = assign_sub_area(lat, lng, areas)
+    zone = lookup_school_zone(lat, lng)
     return {
+        # None means outside Dallas ISD, not "no data".
+        "elementary": zone.elementary if zone else None,
+        "elementary_short": zone.short if zone else None,
+        "middle": zone.middle if zone else None,
+        "high": zone.high if zone else None,
         "address": row.get("ADDRESS") or "",
         "city": row.get("CITY") or "",
         "state": row.get("STATE OR PROVINCE") or row.get("STATE") or "",
@@ -209,7 +243,7 @@ def main() -> int:
     seen: dict[str, dict] = {}  # de-dupe by (address, zip)
 
     for area in areas:
-        rows = fetch_bbox(area.bbox, args.status, args.min_price, args.max_price, rate)
+        rows = fetch_area(area, args.status, args.min_price, args.max_price, rate)
         LOG.info("  %s: %d raw rows", area.id, len(rows))
         for row in rows:
             norm = normalize(row, areas)
@@ -235,6 +269,27 @@ def main() -> int:
 
     listings = list(seen.values())
     LOG.info("Total unique %s listings: %d", args.status, len(listings))
+
+    # Refuse to overwrite a good snapshot with an empty one. Every fetch_area
+    # call swallows its own errors and returns [], so a captcha or a 403 across
+    # all areas looks exactly like "the market has no listings" by the time we
+    # get here -- and writing that would clobber the committed time-series that
+    # is the whole point of data/. Fail loud and leave the last good file alone.
+    category = "listings" if args.status == "active" else "sold"
+    latest = DATA_ROOT / category / "latest_redfin.json"
+    if not listings and latest.exists():
+        try:
+            previous = len(json.loads(latest.read_text()).get("listings", []))
+        except (OSError, ValueError):
+            previous = 0
+        if previous:
+            LOG.error(
+                "Scraped 0 %s listings but %s holds %d. Refusing to overwrite it. "
+                "This is almost certainly a captcha or rate limit, not an empty "
+                "market -- rerun with a higher --rate-seconds or via a residential proxy.",
+                args.status, latest, previous,
+            )
+            return 1
 
     snapshot = {
         "as_of": utc_now_iso(),

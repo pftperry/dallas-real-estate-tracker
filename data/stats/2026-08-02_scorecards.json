@@ -1,45 +1,13 @@
 {
-  "as_of": "2026-08-02T08:48:04Z",
+  "as_of": "2026-08-02T23:54:00Z",
   "scorecards": [
-    {
-      "id": "forest_hills",
-      "name": "Forest Hills",
-      "tier": "S",
-      "lakewood_orbit": 1.0,
-      "school_district": "DISD",
-      "school_quality_score": 9,
-      "config_median_12mo_usd": 759750,
-      "config_yoy_pct": 9.0,
-      "active": {
-        "n": 3,
-        "median_price_usd": 799000,
-        "median_ppsf_usd": 454,
-        "median_dom_days": 43
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
     {
       "id": "hollywood_heights",
       "name": "Hollywood Heights / Santa Monica",
       "tier": "S",
       "lakewood_orbit": 1.0,
       "school_district": "DISD",
-      "school_quality_score": 9,
+      "school_quality_score": 10,
       "config_median_12mo_usd": 749000,
       "config_yoy_pct": 47.2,
       "active": {
@@ -49,53 +17,21 @@
         "median_dom_days": 24
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 1,
+        "median_price_usd": 1050000,
+        "median_ppsf_usd": 384
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 14,
+        "median_price_usd": 782500.0,
+        "median_ppsf_usd": 444.5
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 27,
+        "median_price_usd": 849000,
+        "median_ppsf_usd": 453
       },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "m_streets",
-      "name": "M Streets / Greenland Hills",
-      "tier": "S",
-      "lakewood_orbit": 0.9,
-      "school_district": "DISD",
-      "school_quality_score": 10,
-      "config_median_12mo_usd": 865000,
-      "config_yoy_pct": -6.9,
-      "active": {
-        "n": 15,
-        "median_price_usd": 850000,
-        "median_ppsf_usd": 387,
-        "median_dom_days": 53
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
+      "turnover_proxy": 5.4
     },
     {
       "id": "lakewood_proper",
@@ -113,21 +49,85 @@
         "median_dom_days": 3
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 3,
+        "median_price_usd": 899900,
+        "median_ppsf_usd": 508
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 5,
+        "median_price_usd": 949000,
+        "median_ppsf_usd": 508
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 12,
+        "median_price_usd": 997500.0,
+        "median_ppsf_usd": 511.0
       },
-      "turnover_proxy": 0.0
+      "turnover_proxy": 12.0
+    },
+    {
+      "id": "m_streets",
+      "name": "M Streets / Greenland Hills",
+      "tier": "S",
+      "lakewood_orbit": 0.9,
+      "school_district": "DISD",
+      "school_quality_score": 10,
+      "config_median_12mo_usd": 865000,
+      "config_yoy_pct": -6.9,
+      "active": {
+        "n": 15,
+        "median_price_usd": 850000,
+        "median_ppsf_usd": 387,
+        "median_dom_days": 53
+      },
+      "sold_30d": {
+        "n": 2,
+        "median_price_usd": 1099925.0,
+        "median_ppsf_usd": 342.0
+      },
+      "sold_90d": {
+        "n": 20,
+        "median_price_usd": 985000.0,
+        "median_ppsf_usd": 424.5
+      },
+      "sold_365d": {
+        "n": 49,
+        "median_price_usd": 949500,
+        "median_ppsf_usd": 451
+      },
+      "turnover_proxy": 3.2666666666666666
+    },
+    {
+      "id": "lakewood_heights",
+      "name": "Lakewood Heights",
+      "tier": "S",
+      "lakewood_orbit": 0.95,
+      "school_district": "DISD",
+      "school_quality_score": 10,
+      "config_median_12mo_usd": 1200000,
+      "config_yoy_pct": null,
+      "active": {
+        "n": 2,
+        "median_price_usd": 1045000.0,
+        "median_ppsf_usd": 391.5,
+        "median_dom_days": 50.5
+      },
+      "sold_30d": {
+        "n": 2,
+        "median_price_usd": 1012000.0,
+        "median_ppsf_usd": 371.0
+      },
+      "sold_90d": {
+        "n": 3,
+        "median_price_usd": 925000,
+        "median_ppsf_usd": 356
+      },
+      "sold_365d": {
+        "n": 8,
+        "median_price_usd": 1075000.0,
+        "median_ppsf_usd": 350.0
+      },
+      "turnover_proxy": 4.0
     },
     {
       "id": "lakewood_hills",
@@ -145,21 +145,53 @@
         "median_dom_days": 37.5
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 3,
+        "median_price_usd": 699000,
+        "median_ppsf_usd": 417
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 18,
+        "median_price_usd": 714000.0,
+        "median_ppsf_usd": 420.0
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 33,
+        "median_price_usd": 729000,
+        "median_ppsf_usd": 421
       },
-      "turnover_proxy": 0.0
+      "turnover_proxy": 2.357142857142857
+    },
+    {
+      "id": "hillside",
+      "name": "Hillside",
+      "tier": "A",
+      "lakewood_orbit": 0.95,
+      "school_district": "DISD",
+      "school_quality_score": 10,
+      "config_median_12mo_usd": 1300000,
+      "config_yoy_pct": null,
+      "active": {
+        "n": 2,
+        "median_price_usd": 638500.0,
+        "median_ppsf_usd": 329.5,
+        "median_dom_days": 201.5
+      },
+      "sold_30d": {
+        "n": 2,
+        "median_price_usd": 602500.0,
+        "median_ppsf_usd": 462.0
+      },
+      "sold_90d": {
+        "n": 3,
+        "median_price_usd": 615000,
+        "median_ppsf_usd": 484
+      },
+      "sold_365d": {
+        "n": 7,
+        "median_price_usd": 649000,
+        "median_ppsf_usd": 444
+      },
+      "turnover_proxy": 3.5
     },
     {
       "id": "wilshire_heights",
@@ -177,21 +209,53 @@
         "median_dom_days": null
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 1,
+        "median_price_usd": 775000,
+        "median_ppsf_usd": 502
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 2,
+        "median_price_usd": 797500.0,
+        "median_ppsf_usd": 463.5
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 3,
+        "median_price_usd": 775000,
+        "median_ppsf_usd": 425
       },
       "turnover_proxy": null
+    },
+    {
+      "id": "caruth_terrace",
+      "name": "Caruth Terrace",
+      "tier": "S",
+      "lakewood_orbit": 0.85,
+      "school_district": "DISD",
+      "school_quality_score": 10,
+      "config_median_12mo_usd": 653750,
+      "config_yoy_pct": 36.2,
+      "active": {
+        "n": 6,
+        "median_price_usd": 1007500.0,
+        "median_ppsf_usd": 346.5,
+        "median_dom_days": 20.0
+      },
+      "sold_30d": {
+        "n": 1,
+        "median_price_usd": 825000,
+        "median_ppsf_usd": 348
+      },
+      "sold_90d": {
+        "n": 4,
+        "median_price_usd": 835000.0,
+        "median_ppsf_usd": 353.5
+      },
+      "sold_365d": {
+        "n": 11,
+        "median_price_usd": 839900,
+        "median_ppsf_usd": 350
+      },
+      "turnover_proxy": 1.8333333333333333
     },
     {
       "id": "vickery_place",
@@ -199,7 +263,7 @@
       "tier": "A",
       "lakewood_orbit": 0.85,
       "school_district": "DISD",
-      "school_quality_score": 8,
+      "school_quality_score": 10,
       "config_median_12mo_usd": 1207576,
       "config_yoy_pct": 30.0,
       "active": {
@@ -226,70 +290,6 @@
       "turnover_proxy": null
     },
     {
-      "id": "lakewood_heights",
-      "name": "Lakewood Heights",
-      "tier": "S",
-      "lakewood_orbit": 0.95,
-      "school_district": "DISD",
-      "school_quality_score": 10,
-      "config_median_12mo_usd": 1200000,
-      "config_yoy_pct": null,
-      "active": {
-        "n": 2,
-        "median_price_usd": 1045000.0,
-        "median_ppsf_usd": 391.5,
-        "median_dom_days": 50.5
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "hillside",
-      "name": "Hillside",
-      "tier": "A",
-      "lakewood_orbit": 0.95,
-      "school_district": "DISD",
-      "school_quality_score": 10,
-      "config_median_12mo_usd": 1300000,
-      "config_yoy_pct": null,
-      "active": {
-        "n": 2,
-        "median_price_usd": 638500.0,
-        "median_ppsf_usd": 329.5,
-        "median_dom_days": 201.5
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
-    {
       "id": "junius_heights",
       "name": "Junius Heights / Peak's Suburban / Munger Place",
       "tier": "B",
@@ -305,53 +305,53 @@
         "median_dom_days": 50
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 5,
+        "median_price_usd": 825000,
+        "median_ppsf_usd": 332
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 19,
+        "median_price_usd": 875000,
+        "median_ppsf_usd": 394
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 44,
+        "median_price_usd": 869750.0,
+        "median_ppsf_usd": 424.0
       },
-      "turnover_proxy": 0.0
+      "turnover_proxy": 1.6296296296296295
     },
     {
-      "id": "caruth_terrace",
-      "name": "Caruth Terrace",
-      "tier": "S",
-      "lakewood_orbit": 0.85,
-      "school_district": "DISD",
-      "school_quality_score": 10,
-      "config_median_12mo_usd": 653750,
-      "config_yoy_pct": 36.2,
+      "id": "l_streets",
+      "name": "L Streets (drawn Lake Highlands zone)",
+      "tier": "A",
+      "lakewood_orbit": 0.4,
+      "school_district": "RISD",
+      "school_quality_score": 9,
+      "config_median_12mo_usd": 599000,
+      "config_yoy_pct": 11.0,
       "active": {
-        "n": 6,
-        "median_price_usd": 1007500.0,
-        "median_ppsf_usd": 346.5,
-        "median_dom_days": 20.0
+        "n": 14,
+        "median_price_usd": 719950.0,
+        "median_ppsf_usd": 335.0,
+        "median_dom_days": 31.0
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 3,
+        "median_price_usd": 650000,
+        "median_ppsf_usd": 291
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 18,
+        "median_price_usd": 679499.5,
+        "median_ppsf_usd": 339.5
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 42,
+        "median_price_usd": 684999.5,
+        "median_ppsf_usd": 341.5
       },
-      "turnover_proxy": 0.0
+      "turnover_proxy": 3.0
     },
     {
       "id": "lake_park_estates",
@@ -369,117 +369,21 @@
         "median_dom_days": 36.0
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 5,
+        "median_price_usd": 739000,
+        "median_ppsf_usd": 338
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 15,
+        "median_price_usd": 749000,
+        "median_ppsf_usd": 327
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 35,
+        "median_price_usd": 699000,
+        "median_ppsf_usd": 321
       },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "moss_farm",
-      "name": "Moss Farm",
-      "tier": "A",
-      "lakewood_orbit": 0.4,
-      "school_district": "RISD",
-      "school_quality_score": 8,
-      "config_median_12mo_usd": 754967,
-      "config_yoy_pct": 26.0,
-      "active": {
-        "n": 16,
-        "median_price_usd": 792500.0,
-        "median_ppsf_usd": 276.5,
-        "median_dom_days": 55.5
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "merriman_park_estates",
-      "name": "Merriman Park Estates",
-      "tier": "A",
-      "lakewood_orbit": 0.5,
-      "school_district": "RISD",
-      "school_quality_score": 9,
-      "config_median_12mo_usd": 837500,
-      "config_yoy_pct": 15.0,
-      "active": {
-        "n": 1,
-        "median_price_usd": 639999,
-        "median_ppsf_usd": 268,
-        "median_dom_days": 19
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "casa_linda",
-      "name": "Casa Linda",
-      "tier": "A",
-      "lakewood_orbit": 0.85,
-      "school_district": "DISD",
-      "school_quality_score": 6,
-      "config_median_12mo_usd": 700000,
-      "config_yoy_pct": -3.0,
-      "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": null
+      "turnover_proxy": 2.1875
     },
     {
       "id": "lake_highlands_estates",
@@ -491,195 +395,35 @@
       "config_median_12mo_usd": 1031181,
       "config_yoy_pct": null,
       "active": {
-        "n": 11,
-        "median_price_usd": 849000,
-        "median_ppsf_usd": 321,
-        "median_dom_days": 58
+        "n": 10,
+        "median_price_usd": 894000.0,
+        "median_ppsf_usd": 316.0,
+        "median_dom_days": 55.5
       },
       "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 4,
+        "median_price_usd": 935000.0,
+        "median_ppsf_usd": 302.0
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "old_lake_highlands",
-      "name": "Old Lake Highlands",
-      "tier": "B",
-      "lakewood_orbit": 0.7,
-      "school_district": "DISD",
-      "school_quality_score": 6,
-      "config_median_12mo_usd": 579000,
-      "config_yoy_pct": 21.1,
-      "active": {
-        "n": 13,
-        "median_price_usd": 869990,
-        "median_ppsf_usd": 337,
-        "median_dom_days": 34
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "l_streets",
-      "name": "L Streets",
-      "tier": "C",
-      "lakewood_orbit": 0.4,
-      "school_district": "RISD",
-      "school_quality_score": 9,
-      "config_median_12mo_usd": 599000,
-      "config_yoy_pct": 11.0,
-      "active": {
         "n": 12,
-        "median_price_usd": 734500.0,
-        "median_ppsf_usd": 335.0,
-        "median_dom_days": 23.5
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "median_price_usd": 1007500.0,
+        "median_ppsf_usd": 328.0
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 24,
+        "median_price_usd": 960000.0,
+        "median_ppsf_usd": 318.5
       },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "town_creek",
-      "name": "Town Creek",
-      "tier": "C",
-      "lakewood_orbit": 0.3,
-      "school_district": "RISD",
-      "school_quality_score": 8,
-      "config_median_12mo_usd": 750000,
-      "config_yoy_pct": null,
-      "active": {
-        "n": 3,
-        "median_price_usd": 1199000,
-        "median_ppsf_usd": 313,
-        "median_dom_days": 72
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
-    },
-    {
-      "id": "little_forest_hills",
-      "name": "Little Forest Hills",
-      "tier": "A",
-      "lakewood_orbit": 0.9,
-      "school_district": "DISD",
-      "school_quality_score": 6,
-      "config_median_12mo_usd": 480000,
-      "config_yoy_pct": -41.0,
-      "active": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null,
-        "median_dom_days": null
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": null
-    },
-    {
-      "id": "lochwood",
-      "name": "Lochwood",
-      "tier": "",
-      "lakewood_orbit": 0.6,
-      "school_district": null,
-      "school_quality_score": null,
-      "config_median_12mo_usd": 603000,
-      "config_yoy_pct": -11.0,
-      "active": {
-        "n": 3,
-        "median_price_usd": 775000,
-        "median_ppsf_usd": 292,
-        "median_dom_days": 39
-      },
-      "sold_30d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
-      },
-      "turnover_proxy": 0.0
+      "turnover_proxy": 2.4
     },
     {
       "id": "mockingbird_meadows",
       "name": "Mockingbird Meadows",
       "tier": "",
       "lakewood_orbit": 0.7,
-      "school_district": null,
-      "school_quality_score": null,
+      "school_district": "DISD",
+      "school_quality_score": 10,
       "config_median_12mo_usd": 662000,
       "config_yoy_pct": -22.1,
       "active": {
@@ -694,16 +438,16 @@
         "median_ppsf_usd": null
       },
       "sold_90d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 1,
+        "median_price_usd": 1100000,
+        "median_ppsf_usd": 421
       },
       "sold_365d": {
-        "n": 0,
-        "median_price_usd": null,
-        "median_ppsf_usd": null
+        "n": 3,
+        "median_price_usd": 975000,
+        "median_ppsf_usd": 421
       },
-      "turnover_proxy": 0.0
+      "turnover_proxy": 3.0
     }
   ]
 }

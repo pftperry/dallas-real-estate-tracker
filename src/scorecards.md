@@ -4,7 +4,9 @@ title: Sub-area scorecards
 
 # Sub-area scorecards
 
-Ten primary sub-areas plus three on the watch list. Charts focus on the buyer's two real questions: *where does my $800K–$1.1M actually buy turnkey?* and *where do I have negotiation leverage?*
+Twelve primary sub-areas plus one watch area. Charts focus on the buyer's two real questions: *where does my $750K–$1M actually buy turnkey?* and *where do I have negotiation leverage?*
+
+Every tracked sub-area appears below, including the ones whose medians sit above the $1M ceiling. Those rarely produce an eligible listing, but their sold prints are still the comp set you argue from.
 
 ```js
 const card = await FileAttachment("data/scorecards.json").json();
@@ -18,6 +20,8 @@ const areaName = new Map([
   ...config.sub_areas.map(a => [a.id, a.name]),
   ...(config.watch_areas || []).map(a => [a.id, a.name])
 ]);
+// No Tier C areas survive the eligibility gate, but the key is kept so a future
+// Tier C addition renders in a distinct color instead of the gray fallback.
 const tierColor = { S: "#16a34a", A: "#2563eb", B: "#a16207", C: "#9333ea" };
 const buyBox = config.buy_box;
 const soldRows = (sold.listings || []).filter(d => d.sub_area_id);
@@ -25,7 +29,7 @@ const soldRows = (sold.listings || []).filter(d => d.sub_area_id);
 
 ## What your buy box actually buys
 
-Each dot is one sold home in the last 6 months. The shaded rectangle is your buy box ($${(buyBox.price_min_usd/1000).toFixed(0)}K–$${(buyBox.price_max_usd/1000).toFixed(0)}K, 1,200–4,000 sqft turnkey range). Areas where the dots cluster *inside* the rectangle are where you can transact without stretching.
+Each dot is one sold home in the last 6 months. The shaded band is your buy box price range ($${(buyBox.price_min_usd/1000).toFixed(0)}K–$${(buyBox.price_max_usd/1000).toFixed(0)}K). There is no sqft floor, so the band spans every size on the chart: beds and baths carry the size requirement instead. Areas where the dots cluster *inside* the band are where you can transact without stretching.
 
 ```js
 Plot.plot({
@@ -36,7 +40,9 @@ Plot.plot({
   y: { label: "Sale price", grid: true, tickFormat: d => "$" + (d/1000).toFixed(0) + "k", domain: [400000, 1500000] },
   color: { legend: true, label: "Sub-area" },
   marks: [
-    Plot.rect([{x1: 1200, x2: 4000, y1: buyBox.price_min_usd, y2: buyBox.price_max_usd}],
+    // No sqft floor in the buy box, so the band spans the full x domain and
+    // constrains price only.
+    Plot.rect([{x1: 800, x2: 5000, y1: buyBox.price_min_usd, y2: buyBox.price_max_usd}],
       { x1: "x1", x2: "x2", y1: "y1", y2: "y2", fill: "#22c55e", fillOpacity: 0.10, stroke: "#16a34a", strokeOpacity: 0.4, strokeDasharray: "4,4" }),
     Plot.dot(soldRows.filter(d => d.price_usd && d.sqft), {
       x: "sqft",
@@ -52,14 +58,15 @@ Plot.plot({
 
 > **Key takeaways**
 >
-> - Dots inside the green rectangle = transactions that closed in your $800K–$1.1M, 1,200–4,000 sqft buy-box space. (Note: scoring filters listings to 1,750+ sqft; this chart still shows smaller sales for market context.)
-> - Areas with dense clusters *inside* the rectangle have liquidity at your price point — easy comps, defensible resale.
-> - Empty space inside the rectangle = no recent comps; either you're early to that area, or that price/size combo just doesn't transact there.
-> - Dots far above the rectangle = areas already priced beyond turnkey reach at your band.
+> - Dots inside the green band = transactions that closed inside your $750K–$1M price range. The old 2,000 sqft floor is gone, so a 1,400 sqft home counts as long as it has 3+ beds and 2+ baths.
+> - Price is only one rule of the gate. A dot inside the band was not necessarily an eligible home; it also needed the beds, the baths, and qualifying zoning.
+> - Areas with dense clusters *inside* the band have liquidity at your price point: easy comps, defensible resale.
+> - Empty space inside the band = no recent comps; either you're early to that area, or that price/size combo just doesn't transact there.
+> - An area whose dots all sit above the band is priced past your $1M ceiling. Lakewood proper, Hillside and Wilshire Heights live up there, which is why they are kept mainly for their comp sets.
 
 ## Buy-box capture rate (last 6mo)
 
-Share of recent sales that closed *inside* your $${(buyBox.price_min_usd/1000).toFixed(0)}K–$${(buyBox.price_max_usd/1000).toFixed(0)}K band. Higher = more buyer activity at your price point = more comps to anchor on, and faster signal when something prices wrong.
+Share of recent sales that closed *inside* your $${(buyBox.price_min_usd/1000).toFixed(0)}K–$${(buyBox.price_max_usd/1000).toFixed(0)}K band. Higher = more buyer activity at your price point = more comps to anchor on, and faster signal when something prices wrong. This is a price test only, not the full gate: it says nothing about beds, baths, or whether the address is zoned to Mockingbird or Lakewood Elementary.
 
 ```js
 const captureByArea = d3.rollups(
@@ -118,6 +125,7 @@ Plot.plot({
 >
 > - High capture rate (60%+) = the area's natural price band overlaps yours. More comps, easier resale, but also more competition on each listing.
 > - Low capture rate (<20%) = you'd be near the top of the local market. Resale buyer pool is thinner; price defense in a downturn is weaker.
+> - A high capture rate does not mean eligible inventory. An area can transact heavily in your band and still produce nothing, because most of its footprint fails the location gate. Read this chart alongside the zoning notes below.
 > - Cross-reference with the Lakewood-orbit weight: high orbit + high capture = sweet spot; high orbit + low capture = stretching.
 
 ## $/sqft distribution by sub-area (last 6mo sold)
@@ -222,6 +230,8 @@ Plot.plot({
 > - Consistently high YoY plus high capture rate = momentum + liquidity = strong buy signal. High YoY plus low capture rate = thin market that just had a couple high prints; treat with skepticism.
 
 ## Sortable scorecard
+
+Tier and the school-quality score are ranking inputs, not eligibility. Whether a given address qualifies is decided per listing from resolved DISD zoning, so a Tier S area can still return zero eligible listings if its footprint falls outside the Mockingbird and Lakewood Elementary boundaries.
 
 ```js
 const rows = card.scorecards.map(c => ({
