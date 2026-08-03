@@ -83,8 +83,8 @@
       "ppsf_usd": 447,
       "yoy_appreciation_pct": -6.9,
       "tier": "S",
-      "notes": "Mockingbird Elementary covers only part of this footprint, so per-address zoning matters here more than in Hollywood Heights. Median \\$865K sits mid-band under the new ceiling, the best price fit of any Tier S area. Conservation district. Walkable to Greenville Ave. Negative YoY = buyer leverage.",
-      "bbox": {"sw_lat": 32.815, "sw_lng": -96.785, "ne_lat": 32.840, "ne_lng": -96.770}
+      "notes": "Mockingbird Elementary covers only part of this footprint, so per-address zoning matters here more than in Hollywood Heights. Median \\$865K sits mid-band under the new ceiling, the best price fit of any Tier S area. Conservation district. Walkable to Greenville Ave. Negative YoY = buyer leverage. South edge moved from 32.815 to 32.824 on 2026-08-02: the old box reached south past Belmont Ave and swallowed Vickery Place, so Willis / Belmont / Vickery Blvd homes (all zoned Geneva Heights) were being tagged M Streets and polluting its $/sqft comps. Verified empirically -- M Streets names (Monticello, Mercedes, Martel, McCommas, Marquita) occupy lat 32.8258-32.8316, Vickery Place names 32.8085-32.8231.",
+      "bbox": {"sw_lat": 32.824, "sw_lng": -96.785, "ne_lat": 32.840, "ne_lng": -96.770}
     },
     {
       "id": "lakewood_heights",
@@ -175,26 +175,6 @@
       "tier": "S",
       "notes": "Small enclave east of Greenville Ave, between Mockingbird Ln (N) and Belmont/Vanderbilt (S). Mostly Mockingbird-zoned, but the two active listings as of the 2026-05-03 snapshot both fell outside the zone -- this is an area where per-address checking earns its keep. Median \\$654K sits just under the new floor, so entry-level stock is now too cheap to qualify; the \\$750K-1M renovated mid-century band is the target. 66 DOM = negotiation room.",
       "bbox": {"sw_lat": 32.838, "sw_lng": -96.770, "ne_lat": 32.850, "ne_lng": -96.755}
-    },
-    {
-      "id": "vickery_place",
-      "name": "Vickery Place",
-      "zip_codes": ["75206"],
-      "lakewood_orbit": 0.85,
-      "school_district": "DISD",
-      "feeder_pattern": "Wilson HS / Long MS / Mockingbird Elementary (N) + Geneva Heights / Lipscomb (S)",
-      "feeder_verified": true,
-      "elementary_zones": ["Mockingbird Elementary School"],
-      "school_quality_score": 10,
-      "median_sale_12mo_usd": 1207576,
-      "median_sale_recent_usd": 1267500,
-      "dom_recent_days": null,
-      "ppsf_usd": 491,
-      "yoy_appreciation_pct": 30.0,
-      "tier": "A",
-      "stretch": true,
-      "notes": "Urban-walkable, M Streets-adjacent. Roughly the northern 60% is Mockingbird-zoned; the southern remainder splits to Geneva Heights and Lipscomb and fails the gate. Median \\$1.21M is above the ceiling. +30% YoY is real momentum.",
-      "bbox": {"sw_lat": 32.820, "sw_lng": -96.785, "ne_lat": 32.835, "ne_lng": -96.770}
     },
     {
       "id": "junius_heights",
@@ -310,7 +290,8 @@
       "town_creek": "RISD and outside the drawn zone (north and west of it).",
       "moss_farm": "RISD and north of the drawn zone.",
       "merriman_park_estates": "RISD and well west of the drawn zone.",
-      "lochwood": "Watch area. Hexter-zoned, south and east of the drawn zone."
+      "lochwood": "Watch area. Hexter-zoned, south and east of the drawn zone.",
+      "vickery_place": "Removed after its bbox was corrected. The old box (32.820-32.835) sat entirely inside the M Streets box, so assign_sub_area -- which takes the first containing area -- never assigned it a single listing; its scorecard had been permanently empty while still costing a scrape call per run, and its apparent 59% Mockingbird coverage was really a measurement of M Streets ground. Corrected to the real extent from listing addresses (Belmont / Willis / Vickery Blvd / Homer at lat 32.8085-32.8231, Belmont Ave centerline 32.8144), it is 75% Geneva Heights and 25% East Dallas, with 0% qualifying area, so the same rule that removed the six above applies. Correcting it also raised the M Streets south edge to 32.824, which lifted that area's measured Mockingbird coverage from 46% to 71% by removing Geneva Heights homes that had been contaminating its $/sqft comps."
     },
     "had_partial_qualifying_area_but_dropped_by_choice": {
       "casa_linda": "About 10% of its footprint is Lakewood Elementary. Dropped by preference on 2026-08-02.",

@@ -23,6 +23,10 @@ const areaName = new Map([
 ]);
 const buyBox = config.buy_box;
 const allActive = (watchlist.listings || []);
+// Redundant since the price rule became part of the hard gate -- everything in
+// watchlist.listings is already inside the band, so this is currently a no-op.
+// Kept as a guard so these sections stay correct if the gate is ever relaxed
+// back to scoring price rather than filtering on it.
 const inBox = allActive.filter(li => li.price_usd >= buyBox.price_min_usd && li.price_usd <= buyBox.price_max_usd);
 ```
 

@@ -20,6 +20,8 @@ const areaName = new Map([
   ...config.sub_areas.map(a => [a.id, a.name]),
   ...(config.watch_areas || []).map(a => [a.id, a.name])
 ]);
+// No Tier C areas survive the eligibility gate, but the key is kept so a future
+// Tier C addition renders in a distinct color instead of the gray fallback.
 const tierColor = { S: "#16a34a", A: "#2563eb", B: "#a16207", C: "#9333ea" };
 const buyBox = config.buy_box;
 const soldRows = (sold.listings || []).filter(d => d.sub_area_id);
