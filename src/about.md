@@ -81,18 +81,19 @@ Edit weights in `pipeline/score.py`:
 
 ```python
 WEIGHTS = {
-    "lakewood_orbit": 0.30,  # turn this up to bias harder toward Lakewood-side
-    "price_fit": 0.20,
-    "schools": 0.10,
-    "ppsf_vs_peers": 0.10,
-    "dom_leverage": 0.10,
-    "vintage": 0.10,
-    "lot_size": 0.10,
+    "ppsf_vs_peers": 0.30,  # the value signal: $/sqft vs size-matched sold comps
+    "lot_size": 0.20,
+    "dom_leverage": 0.15,   # longer on market = more negotiation room
+    "vintage": 0.15,
+    "schools": 0.10,        # zoning *confidence*, not quality
+    "price_fit": 0.10,
 }
 ```
 
 Then run `python -m pipeline.score` to regenerate the watchlist.
 
-Because schools are now a gate rather than a preference, the 10% `schools` weight only separates verified Mockingbird/Lakewood zoning (full credit) from drawn-zone-only qualification (0.9). If that distinction stops mattering, reallocate the weight.
+The score ranks **the house, not the location**, because the gate already settled location and all three qualifying bases count equally. `lakewood_orbit` used to carry 30% here and was supplying 36% of the score's whole discriminating power; once the gate existed it double-charged the same preference, burying the drawn Lake Highlands zone by construction and penalizing Junius Heights for feeder uncertainty the gate now resolves. It is still reported per listing as context but no longer affects the number.
+
+`price_fit` and `schools` stay small on purpose: the gate enforces both, so neither can move more than a point or two. If you want to bias back toward Lakewood-side proximity, the honest way is to add a small weight keyed on the *qualifying basis* rather than reviving the old 20-area orbit scale.
 
 To change the gate itself rather than the ranking, edit `buy_box` in `config/sub_areas.json`. See the Tuning section of `README.md`.

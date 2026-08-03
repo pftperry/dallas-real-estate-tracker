@@ -126,7 +126,7 @@ Plot.plot({
 > - High capture rate (60%+) = the area's natural price band overlaps yours. More comps, easier resale, but also more competition on each listing.
 > - Low capture rate (<20%) = you'd be near the top of the local market. Resale buyer pool is thinner; price defense in a downturn is weaker.
 > - A high capture rate does not mean eligible inventory. An area can transact heavily in your band and still produce nothing, because most of its footprint fails the location gate. Read this chart alongside the zoning notes below.
-> - Cross-reference with the Lakewood-orbit weight: high orbit + high capture = sweet spot; high orbit + low capture = stretching.
+> - `lakewood_orbit` is shown below as neighborhood context only. It no longer affects the buy-fit score: the gate settles location, so the score ranks the house. Treat a low-orbit area with high capture as a genuine opportunity rather than a compromise.
 
 ## $/sqft distribution by sub-area (last 6mo sold)
 

@@ -9,7 +9,9 @@ import L from "npm:leaflet";
 
 # Watchlist
 
-Every listing here has cleared a **hard eligibility gate**: price inside the buy box, 3+ bedrooms, 2+ bathrooms, and either zoned to **Mockingbird or Lakewood Elementary** or sitting inside the **drawn Lake Highlands zone**. Anything failing one of those is excluded outright rather than merely down-ranked. Survivors are then ranked by buy-fit score: Lakewood-orbit 30%, price fit 20%, schools 10%, $/sqft vs. peers 10%, DOM leverage 10%, vintage 10%, lot size 10%. Busy-street listings are flagged ⚠ and lose 5 points.
+Every listing here has cleared a **hard eligibility gate**: price inside the buy box, 3+ bedrooms, 2+ bathrooms, and either zoned to **Mockingbird or Lakewood Elementary** or sitting inside the **drawn Lake Highlands zone**. Anything failing one of those is excluded outright rather than merely down-ranked.
+
+Survivors are ranked on **the house, not the neighborhood** — location is already settled by the gate, and all three qualifying bases count equally. Weights: $/sqft vs. peers 30%, lot size 20%, DOM leverage 15%, vintage 15%, school confidence 10%, price position 10%. Busy-street listings are flagged ⚠ and lose 5 points.
 
 Zoning is resolved **per address** from the listing's own coordinates against all 135 official Dallas ISD elementary attendance polygons, not from neighborhood feeder labels. Those labels were wrong in several areas.
 
@@ -342,16 +344,17 @@ Applied only to listings that already passed the gate.
 
 | Component | Weight | What it measures |
 |---|---:|---|
-| Lakewood orbit | 30% | How "Lakewood" the sub-area feels (1.0 = Lakewood-side, 0.3 = deep LH) |
-| Price fit | 20% | Full credit mid-band; tapers toward the $750K and $1M edges |
-| Schools | 10% | From the **resolved** zone: verified Mockingbird/Lakewood = full credit, drawn-zone-only = 0.9. No longer from the unreliable sub-area score. |
-| $/sqft vs. peers | 10% | **Size-normalized**: compares to sold comps in same sub-area within ±25% sqft. Falls back to area median if peer set <3. |
-| DOM leverage | 10% | Longer-on-market = more negotiation room |
-| Vintage | 10% | Newer build = more turnkey, less maintenance |
-| Lot size | 10% | Bigger lots — meaningful in Dallas where lot premiums diverge sharply |
+| $/sqft vs. peers | 30% | **Size-normalized**: compares to sold comps in same sub-area within ±25% sqft. Full credit at 25% under peers, neutral on baseline, zero at 25% over. Falls back to area median if peer set <3. |
+| Lot size | 20% | Bigger lots — meaningful in Dallas where lot premiums diverge sharply |
+| DOM leverage | 15% | Longer-on-market = more negotiation room |
+| Vintage | 15% | Newer build = more turnkey, less maintenance |
+| School confidence | 10% | Verified Mockingbird/Lakewood zoning = full credit; drawn-zone-only = 0.9. Not school *quality* — the gate already guaranteed that. This is how certain the zoning claim is. |
+| Price position | 10% | Full credit mid-band, tapering toward the $750K and $1M edges |
 | Busy-street flag | -5pt | Soft penalty for Garland Rd, Buckner, Skillman, Abrams, Mockingbird, NW Hwy, Plano Rd, Walnut Hill, Forest Ln, Greenville Ave, Audelia, Royal Ln |
 
-Because schools are now a gate, the 10% school weight only separates verified DISD zoning from drawn-zone-only qualification. If that distinction stops mattering to you, reallocate the weight in `pipeline/score.py`.
+**Where did Lakewood-orbit go?** It used to carry 30% and was supplying 36% of the score's entire discriminating power. That made sense when the screen spanned 20 areas and location was the open question. Once the gate decided location, it charged the same preference twice: it pushed the drawn Lake Highlands zone into the bottom four ranks by construction, and it docked Junius Heights 13.5 points for feeder uncertainty the per-address gate now resolves outright. Two homes with identical Lakewood Elementary zoning could sit five ranks apart on neighborhood label alone. So location left the score. `lakewood_orbit` is still reported per listing as context; it just no longer moves the number.
+
+`price_fit` and `school confidence` are deliberately small: the gate already enforces both, so they can only ever move a point or two. The work is done by $/sqft, lot, DOM and vintage — the things that still genuinely vary once every listing is somewhere you would live.
 
 **Why size-normalized $/sqft?** Larger homes price at lower $/sqft as a baseline (fixed costs spread across more sqft). The previous "vs. area median" rule fired on every 4,000 sqft listing in a 2,000-sqft-typical neighborhood, generating false-positive "hidden value" flags. The peer-comp rule now compares apples to apples. Peer baselines are drawn from **all** scraped listings, including ones that fail the gate: a $1.3M neighbor is still a valid comp even though it can never be a buy.
 

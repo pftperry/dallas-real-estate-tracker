@@ -17,14 +17,17 @@ Two stages, in this order:
    Those strings were wrong for several sub-areas: "Forest Hills" was labeled a
    Lakewood Elementary feeder but is entirely Hexter.
 
-2. SCORING, on survivors only, 0-100:
-     - geographic affinity (Lakewood-orbit weight from the sub-area config)
-     - school quality (from the *resolved* zone, not the sub-area guess)
-     - price fit vs. buy box
-     - $/sqft vs. peer comps (size-normalized: same sub-area, +/-25% sqft)
-     - days on market (longer = more leverage)
-     - condition / vintage signal (turnkey via year built)
-     - lot size (larger = better)
+2. SCORING, on survivors only, 0-100. Ranks the *house*, not the location,
+   because the gate has already settled location:
+     - $/sqft vs. peer comps, 30% (size-normalized: same sub-area, +/-25% sqft)
+     - lot size, 20%
+     - days on market, 15% (longer = more leverage)
+     - condition / vintage signal, 15% (turnkey via year built)
+     - school confidence, 10% (verified DISD zoning vs. geography-only)
+     - price position within the band, 10%
+
+   Geographic affinity (lakewood_orbit) was removed from the score in 2026-08;
+   see the WEIGHTS comment for why. It is still reported per listing as context.
 
 Plus two off-score flags surfaced separately: busy-street exposure, and
 near_zone_edge for listings close enough to an attendance boundary that the
@@ -32,8 +35,8 @@ rooftop coordinate cannot settle which side they are on.
 
 Outputs data/stats/latest_watchlist.json with a ranked list.
 
-Weights aligned to deep-research review (2026-05): location 30%, price fit
-20%, lot 10%, schools 10%, $/sqft vs peers 10%, DOM 10%, vintage 10%.
+Weights: $/sqft vs peers 30%, lot 20%, DOM 15%, vintage 15%, schools 10%,
+price fit 10%. Supersedes the 2026-05 set, which put 30% on Lakewood-orbit.
 """
 
 from __future__ import annotations
@@ -62,19 +65,49 @@ from scrapers.utils import (
 
 LOG = logging.getLogger("score")
 
+# Rebalanced 2026-08-03, when the hard gate made the old weights incoherent.
+#
+# `lakewood_orbit` used to carry 30% and, measured against the eligible set, was
+# supplying 36% of all the score's discriminating power -- more than double any
+# other component. That was correct when the screen spanned 20 areas and location
+# was the main open question. It is wrong now: the gate already decides location,
+# and the three accepted bases (Mockingbird zoning, Lakewood zoning, the drawn
+# Lake Highlands zone) are an OR, so re-penalising one of them in the ranking
+# charges the same preference twice. It buried the drawn zone in the bottom four
+# ranks by construction, and it docked Junius Heights 13.5 points for "feeder
+# uncertainty" that the per-address gate now resolves outright.
+#
+# So location leaves the score entirely. What remains ranks the *house*, on the
+# premise that anything being ranked has already cleared the location test. The
+# one location signal kept is `schools`, which distinguishes verified DISD zoning
+# from geography-only qualification -- a real difference in confidence, worth a
+# point rather than eighteen.
+#
+# `price_fit` drops to 10% because the gate enforces the band, leaving it nearly
+# constant (a 3.8-point spread across the eligible set). `ppsf_vs_peers` rises to
+# 30% and its formula is widened below: it is the actual value signal and was
+# contributing 3.5 points.
 WEIGHTS = {
-    "lakewood_orbit": 0.30,
-    "price_fit": 0.20,
+    "ppsf_vs_peers": 0.30,
+    "lot_size": 0.20,
+    "dom_leverage": 0.15,
+    "vintage": 0.15,
     "schools": 0.10,
-    "ppsf_vs_peers": 0.10,
-    "dom_leverage": 0.10,
-    "vintage": 0.10,
-    "lot_size": 0.10,
+    "price_fit": 0.10,
 }
 
 # Peer-comp window for size-normalized $/sqft comparison.
 PEER_SQFT_WINDOW = 0.25  # +/- 25%
 PEER_MIN_COUNT = 3       # need at least 3 peers; otherwise fall back to area median
+
+# $/sqft scoring band, as a ratio to the peer baseline. Symmetric +/-25%: at 0.75
+# (a quarter under peers) full credit, at 1.00 (on baseline) neutral 0.5, at 1.25
+# no credit. The old rule was max(0, 1.2 - ratio), which produced a 0.00-0.35
+# output range on real data -- a 10%-weighted component that could only ever move
+# 3.5 points, and which collapsed to zero for everything above 1.2x, discarding
+# the distinction between "slightly over peers" and "wildly over".
+PPSF_RATIO_BEST = 0.75
+PPSF_RATIO_WORST = 1.25
 
 # Dallas arterial / busy-street name patterns. Used as the cheap "address-on"
 # check for listings whose street name itself is an arterial.
@@ -542,10 +575,13 @@ def score_listing(
 
     ppsf = li.get("ppsf_usd") or 0
     if ppsf and ppsf_baseline:
-        # Size-normalized: ratio < 1 = under-baseline (good); > 1.2 = penalty.
+        # Size-normalized, linear across the band, clamped at both ends so a
+        # listing far above peers still scores 0 rather than going negative.
         ratio = ppsf / ppsf_baseline
-        ppsf_vs = max(0.0, 1.2 - ratio) if ratio <= 1.2 else 0.0
+        span = PPSF_RATIO_WORST - PPSF_RATIO_BEST
+        ppsf_vs = min(1.0, max(0.0, (PPSF_RATIO_WORST - ratio) / span))
     else:
+        # No baseline (thin peer set, missing $/sqft): neutral, same as on-baseline.
         ppsf_vs = 0.5
 
     dom = li.get("days_on_market") or 0
@@ -579,14 +615,16 @@ def score_listing(
     else:
         lot_size = 0.4
 
+    # Note lakewood_orbit is deliberately absent: see the WEIGHTS comment. It is
+    # still reported in components below as neighborhood context, but it no longer
+    # moves the score.
     raw = (
-        WEIGHTS["lakewood_orbit"] * sub_orbit
-        + WEIGHTS["schools"] * school_score
-        + WEIGHTS["price_fit"] * price_fit
-        + WEIGHTS["ppsf_vs_peers"] * ppsf_vs
+        WEIGHTS["ppsf_vs_peers"] * ppsf_vs
+        + WEIGHTS["lot_size"] * lot_size
         + WEIGHTS["dom_leverage"] * dom_leverage
         + WEIGHTS["vintage"] * vintage
-        + WEIGHTS["lot_size"] * lot_size
+        + WEIGHTS["schools"] * school_score
+        + WEIGHTS["price_fit"] * price_fit
     )
     busy = busy_street_assessment(li)
     # Soft penalty for busy-street exposure (address OR proximity to arterial).
