@@ -19,7 +19,7 @@
         "Mockingbird Elementary School",
         "Lakewood Elementary School"
       ],
-      "focus_zone_allowlist": ["l_streets"],
+      "focus_zone_allowlist": ["l_streets", "lake_highlands_estates"],
       "zoning_source": "config/school_zones.geojson -- all 135 Dallas ISD official elementary attendance boundaries, 2026-27 school year. Resolved per listing lat/lng by scrapers/school_zones.py, NOT from the feeder_pattern strings below. elementary_allowlist above must match TARGET_ELEMENTARIES in that module; pipeline/score.py refuses to run if they drift apart.",
       "zoning_caveat": "Zoning is resolved from the listing's Redfin lat/lng, which is rooftop-accurate but not surveyed. Listings within ~40m of a zone edge are flagged near_zone_edge for manual confirmation on the DISD SchoolFinder before touring.",
       "exclusion_reasons": "Location failures are reported as wrong_elementary (resolved to a real DISD zone that is not allowlisted -- the actual zone is named) or outside_disd (Richardson ISD or beyond the district). Caching the whole district rather than only the qualifying zones is what makes that distinction possible."
@@ -259,7 +259,15 @@
       "ppsf_usd": null,
       "yoy_appreciation_pct": null,
       "tier": "B",
-      "notes": "RISD, so the DISD elementary gate cannot pass here. Sits mostly WEST of Audelia Rd and therefore outside the hand-drawn zone; only its eastern edge (Audelia to about -96.715) qualifies. Premium LH pocket, top-of-band pricing. Feeder pattern is unverified -- only DISD boundaries are cached, and the gate does not depend on it here.",
+      "focus_zone": true,
+      "notes": "Promoted to a qualifying focus zone on 2026-08-03. RISD, so the DISD elementary gate can never pass here -- it qualifies on geography, the same basis as the drawn L Streets zone. Previously only its eastern sliver counted, the accidental overlap with that drawn zone past Audelia, which meant zero of its listings ever qualified. The rectangle below is NOT a traced outline; it is the original bbox, kept because it was validated empirically rather than assumed: 34 scraped rows occupy lat 32.8759-32.8928 and lng -96.7299-96.7159, filling it almost exactly, and all 34 resolve outside Dallas ISD as expected. Contrast vickery_place, whose bbox turned out to be nested inside another area and had never received a listing. Premium LH pocket; median \\$1.03M sits above the \\$1M ceiling, so most inventory here is priced out and only the lower end qualifies. Feeder pattern is unverified -- only DISD boundaries are cached, and the gate does not depend on it here.",
+      "polygon": [
+        [-96.7300, 32.8750],
+        [-96.7150, 32.8750],
+        [-96.7150, 32.8950],
+        [-96.7300, 32.8950],
+        [-96.7300, 32.8750]
+      ],
       "bbox": {"sw_lat": 32.875, "sw_lng": -96.730, "ne_lat": 32.895, "ne_lng": -96.715}
     }
   ],

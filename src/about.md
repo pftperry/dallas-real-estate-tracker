@@ -4,7 +4,7 @@ title: About
 
 # About this tracker
 
-Personal tracker for Lakewood-orbit and Lake Highlands sub-areas in Dallas. Built around a **$750K–$1M, 3+ bed / 2+ bath** turnkey buy box, gated to homes zoned to **Mockingbird or Lakewood Elementary** or sitting inside a hand-drawn Lake Highlands zone.
+Personal tracker for Lakewood-orbit and Lake Highlands sub-areas in Dallas. Built around a **$750K–$1M, 3+ bed / 2+ bath** turnkey buy box, gated to homes zoned to **Mockingbird or Lakewood Elementary** or sitting inside one of two Lake Highlands geographic zones.
 
 ## The eligibility gate
 
@@ -15,7 +15,7 @@ As of 2026-08-02, schools are a hard requirement rather than a 10% scoring weigh
 | Price | $750,000–$1,000,000 |
 | Bedrooms | 3 or more |
 | Bathrooms | 2 or more |
-| Location | Zoned to Mockingbird or Lakewood Elementary, **or** inside the drawn Lake Highlands zone |
+| Location | Zoned to Mockingbird or Lakewood Elementary, **or** inside a Lake Highlands geographic zone (L Streets outline, or Lake Highlands Estates) |
 
 There is no sqft floor. Beds and baths carry the size requirement.
 
@@ -35,10 +35,10 @@ Zoning is resolved **per address** from the listing's coordinates against the of
 **Qualifying zoning but above the $1M ceiling, so listings will be rare:**
 - Lakewood proper ($1.5M median), Hillside ($1.3M), Wilshire Heights ($1.5M). Kept largely for their comp sets.
 
-**Qualifying on geography only, via the drawn zone:**
+**Qualifying on geography only, via a Lake Highlands zone:**
 - L Streets (drawn Lake Highlands zone) — RISD, so the elementary gate can never pass here. Bounded by Audelia Rd, Plano Rd, East Northwest Hwy, and a line just south of I-635.
 - Lake Park Estates — Hexter-zoned, but its northwest corner falls inside the drawn zone.
-- Lake Highlands Estates — RISD and mostly west of Audelia, so only its eastern edge qualifies.
+- Lake Highlands Estates — RISD, promoted to a qualifying zone in its own right on 2026-08-03. Previously only its eastern sliver counted (the accidental overlap with the L Streets outline), so none of its listings ever qualified. Its 1963-65 stock on 8-10k lots turns out to be the closest fit in the whole screen to a character home on a real lot.
 
 **Watch list:** Mockingbird Meadows — about half its footprint is Mockingbird-zoned, which the old config did not reflect.
 
@@ -75,7 +75,7 @@ Texas is a non-disclosure state, so DCAD has appraised values, not sale prices. 
 - **Scored output is regenerated, not stored.** `data/listings/` and `data/sold/` are committed and irreplaceable; `data/stats/` is derived from them and gitignored, since committing it collided with every CI run that landed while a branch was open. Both the ETL job and the deploy job rebuild it. A past watchlist is still recoverable from git history, but rebuilding one applies today's weights rather than the weights in force that day.
 - **Redfin CSV endpoint can fail.** If it returns HTML/captcha, the scraper logs an error and proceeds. Add a residential proxy (ScraperAPI, Bright Data) if it becomes flaky.
 - **YoY appreciation samples can be thin.** A 47% YoY $/sqft jump in Hollywood Heights (small neighborhood) can mean three pricey closings, not a real trend. Always sanity-check against the 12-mo median.
-- **DISD vs. RISD only matters in 2031+.** First child born this year would start kindergarten ~2031. Within a 5+ year hold, school zoning is a resale lever, not an operational concern. That is the argument for keeping the drawn Lake Highlands zone in scope despite it failing the elementary gate.
+- **DISD vs. RISD only matters in 2031+.** First child born this year would start kindergarten ~2031. Within a 5+ year hold, school zoning is a resale lever, not an operational concern. That is the argument for keeping the Lake Highlands zones in scope despite their failing the elementary gate.
 
 ## Tweaking the scoring
 

@@ -9,7 +9,7 @@ import L from "npm:leaflet";
 
 # Watchlist
 
-Every listing here has cleared a **hard eligibility gate**: price inside the buy box, 3+ bedrooms, 2+ bathrooms, and either zoned to **Mockingbird or Lakewood Elementary** or sitting inside the **drawn Lake Highlands zone**. Anything failing one of those is excluded outright rather than merely down-ranked.
+Every listing here has cleared a **hard eligibility gate**: price inside the buy box, 3+ bedrooms, 2+ bathrooms, and either zoned to **Mockingbird or Lakewood Elementary** or sitting inside one of two **Lake Highlands geographic zones** (the drawn L Streets outline, or Lake Highlands Estates). Anything failing one of those is excluded outright rather than merely down-ranked.
 
 Survivors are ranked on **the house, not the neighborhood** — location is already settled by the gate, and all three qualifying bases count equally. The score answers one question: *is this a character home on a real lot, at a fair price?* Weights: lot size 30%, period character 25%, $/sqft vs. peers 20%, baths per bedroom 10%, size 10%, price position 5%.
 
@@ -34,8 +34,15 @@ const ppsfColor = d3.scaleLinear()
   .clamp(true);
 const nearMisses = (watchlist.excluded || []).filter(
   x => (x._exclusion_reasons || []).length === 1
-    && x._exclusion_reasons[0].startsWith("location_gate")
+    && /^(location_gate|wrong_elementary|outside_disd|location_unverifiable)/.test(x._exclusion_reasons[0])
 );
+
+// Compact labels for the geographic zones. More than one qualifies now, so a bare
+// "LH zone" would not say which.
+const focusZoneLabel = new Map([
+  ["l_streets", "L Streets"],
+  ["lake_highlands_estates", "LH Estates"]
+]);
 ```
 
 <div class="grid grid-cols-4">
@@ -51,7 +58,7 @@ const nearMisses = (watchlist.excluded || []).filter(
 
 ## Why listings were excluded
 
-Of the ${watchlist.n} eligible, **${watchlist.eligible_by_basis?.elementary_zone ?? 0} qualify on verified Mockingbird or Lakewood zoning** and **${watchlist.eligible_by_basis?.focus_zone ?? 0} on geography alone** via the drawn Lake Highlands zone. ${watchlist.n_excluded ?? 0} of ${watchlist.n_screened ?? 0} screened listings failed the gate. A listing can fail on more than one count, so these do not sum to the total.
+Of the ${watchlist.n} eligible, **${watchlist.eligible_by_basis?.elementary_zone ?? 0} qualify on verified Mockingbird or Lakewood zoning** and **${watchlist.eligible_by_basis?.focus_zone ?? 0} on geography alone** via the Lake Highlands zones. ${watchlist.n_excluded ?? 0} of ${watchlist.n_screened ?? 0} screened listings failed the gate. A listing can fail on more than one count, so these do not sum to the total.
 
 ```js
 Plot.plot({
@@ -108,10 +115,10 @@ Inputs.table(top, {
       // zone (Lake Park Estates is Hexter), and showing "Hexter" in green here
       // would imply it passed on schools when it passed on geography.
       const verified = li._eligible_basis === "elementary_zone";
-      const label = verified ? v : "LH zone";
+      const label = verified ? v : (focusZoneLabel.get(li._focus_zone) ?? li._focus_zone ?? "—");
       const tip = verified
         ? `Zoned ${li._feeder} (DISD official). ${edge}m from the zone edge.`
-        : `Qualifies on geography: inside the drawn ${li._focus_zone} zone. `
+        : `Qualifies on geography: inside the ${li._focus_zone} zone. `
           + `${li._elementary ? `Actually zoned ${li._feeder}, which is not on the allowlist.` : "Outside Dallas ISD (RISD)."}`
           + ` ${edge}m from the zone edge.`;
       const warn = li._near_zone_edge ? " ⚑" : "";
@@ -196,7 +203,7 @@ Inputs.table(top, {
 > - **Lot** is 30% of the score and color-coded: green ≥9,000 sqft, amber <6,000 (usually a subdivided spec build). **Yr** matters almost as much — pre-1945 scores highest, 1966–90 lowest.
 > - **DOM is not scored.** Red = fresh, so expect competition. Purple ⚑ = 90+ days: in a market turning in 24, that usually means something is wrong with the house, so find out what before treating it as a bargain.
 > - There is no sqft floor. Beds and baths carry the size requirement, so small-but-qualifying homes appear.
-> - **Zone** in green = verified Mockingbird or Lakewood attendance zone. Gray "LH zone" = qualifies on geography; it is RISD, so the elementary gate does not apply. A ⚑ there means within 40m of an attendance boundary — confirm on DISD SchoolFinder before touring.
+> - **Zone** in green = verified Mockingbird or Lakewood attendance zone. Gray "L Streets" or "LH Estates" = qualifies on geography; both are RISD, so the elementary gate does not apply. A ⚑ there means within 40m of an attendance boundary — confirm on DISD SchoolFinder before touring.
 > - $/sqft color is relative to the size-matched peer baseline: green = ≥10% under, red = ≥10% over. Hover for the exact percent and anchor.
 
 ## Near misses
@@ -244,11 +251,11 @@ Inputs.table(nearMisses.slice().sort((a, b) => (a._zone_edge_m ?? 1e9) - (b._zon
 > - "Nearest qualifying" names the closest qualifying area, so a 65m miss against Mockingbird is a different conversation from a 65m miss against the drawn Lake Highlands zone.
 > - "Actually zoned" is the real DISD zone for that address, resolved from all 135 district polygons. Hover for the full feeder pattern. "RISD / non-DISD" means outside Dallas ISD altogether.
 > - Read the two zone columns together. A home 100m from Mockingbird that is actually zoned Geneva Heights is a different proposition from one zoned Hexter, even though both fail the same rule.
-> - If several strong near misses cluster just outside one edge of the drawn Lake Highlands zone, that edge is probably drawn a block too tight.
+> - If several strong near misses cluster just outside one edge of a Lake Highlands zone, that edge is probably drawn a block too tight.
 
 ## Map of eligible listings
 
-Markers are color-graded by buy-fit score (green = best fit). Click for address, price, and a Redfin link. The **green shaded areas are the two qualifying elementary attendance zones** and the **blue outline is the drawn Lake Highlands zone** — together they are the location gate. Dashed gray rectangles are sub-area bounding boxes, used only for scraping and labeling.
+Markers are color-graded by buy-fit score (green = best fit). Click for address, price, and a Redfin link. The **green shaded areas are the two qualifying elementary attendance zones** and the **blue outlines are the two Lake Highlands geographic zones** — together they are the location gate. Dashed gray rectangles are sub-area bounding boxes, used only for scraping and labeling.
 
 ```js
 const mapDiv = display(html`<div style="height: 480px; border-radius: 4px; border: 1px solid var(--theme-foreground-faintest);"></div>`);
@@ -355,7 +362,7 @@ Hard gate, applied before any scoring. Failing any row excludes the listing.
 | Price | $750K–$1M |
 | Bedrooms | 3 or more |
 | Bathrooms | 2 or more |
-| Location | Zoned to **Mockingbird** or **Lakewood Elementary**, **or** inside the drawn Lake Highlands zone |
+| Location | Zoned to **Mockingbird** or **Lakewood Elementary**, **or** inside a Lake Highlands geographic zone (L Streets outline, or Lake Highlands Estates) |
 
 Zoning comes from `config/school_zones.geojson` — all 135 official DISD elementary attendance boundaries for 2026-27 — resolved per listing from its coordinates. It is deliberately **not** taken from the `feeder_pattern` labels in `config/sub_areas.json`. Those labels claimed Forest Hills fed Lakewood Elementary; it is entirely Hexter, verified at four corners and every live listing. Boundaries are redrawn annually, so re-pull each spring with `python -m scrapers.school_zones --refresh`.
 

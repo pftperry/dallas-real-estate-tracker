@@ -1,6 +1,6 @@
 # Dallas Real Estate Tracker
 
-Personal tracker for Lakewood-orbit and Lake Highlands sub-areas. Built around a **$750K–$1M, 3+ bed / 2+ bath** turnkey buy box, gated to homes zoned to **Mockingbird or Lakewood Elementary** or sitting inside a hand-drawn Lake Highlands zone.
+Personal tracker for Lakewood-orbit and Lake Highlands sub-areas. Built around a **$750K–$1M, 3+ bed / 2+ bath** turnkey buy box, gated to homes zoned to **Mockingbird or Lakewood Elementary** or sitting inside one of two Lake Highlands geographic zones.
 
 ## What this does
 
@@ -17,7 +17,7 @@ Added 2026-08-02. Schools went from a 10% scoring weight to a hard requirement. 
 | Price | $750,000–$1,000,000 |
 | Bedrooms | `beds >= 3` |
 | Bathrooms | `baths >= 2` |
-| Location | Zoned to Mockingbird or Lakewood Elementary, **or** inside the drawn Lake Highlands zone (`l_streets`) |
+| Location | Zoned to Mockingbird or Lakewood Elementary, **or** inside a Lake Highlands geographic zone (`l_streets` or `lake_highlands_estates`) |
 
 There is **no sqft floor** — beds and baths carry the size requirement.
 
