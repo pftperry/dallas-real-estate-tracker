@@ -13,6 +13,15 @@ src/.observablehq/cache/
 # DCAD bulk cache (huge files, regenerable)
 data/.cache/
 
+# Scored output is DERIVED, not source. data/listings/ and data/sold/ are the
+# irreplaceable time-series (Redfin will not give history back); data/stats/ is
+# a pure function of those plus code plus config, so committing it only created
+# merge conflicts every time a CI run landed while a branch was open. Regenerate
+# with: py -m pipeline.score && py -m pipeline.aggregate
+# Past snapshots remain retrievable from git history:
+#   git show <commit>:data/stats/latest_watchlist.json
+data/stats/
+
 # Editor
 .vscode/
 .idea/

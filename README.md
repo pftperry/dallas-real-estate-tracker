@@ -55,6 +55,10 @@ npm install
 OBSERVABLE_BASE=/ npm run dev               # opens http://localhost:3000
 ```
 
+**Run the pipeline before the dashboard.** `data/stats/` is derived and not
+committed, so a fresh clone has no scored watchlist. The data loaders fail the
+build with the exact command to run rather than quietly serving an empty page.
+
 On Windows the `python` alias may resolve to the Microsoft Store stub. Use `py` instead.
 
 DCAD bulk download is large (~1.5GB unzipped). Run sparingly:
@@ -63,6 +67,30 @@ DCAD bulk download is large (~1.5GB unzipped). Run sparingly:
 python -m scrapers.dcad        # full download + parse
 python -m scrapers.dcad --dry-run   # reuse cached zip
 ```
+
+## Why data/stats/ is not committed
+
+`data/listings/` and `data/sold/` are the real archive: Redfin will not give you
+history back, so every daily snapshot is irreplaceable. `data/stats/` is the
+opposite -- a pure function of those inputs plus the code plus the config.
+
+It used to be committed, and that produced a merge conflict in four files every
+time a CI run landed while a branch was open, on artifacts nobody should ever
+hand-merge. So it is gitignored, and both the ETL job and the deploy job
+regenerate it. The deploy job is a separate checkout from the ETL job, which is
+why it sets up Python and re-runs the pipeline before building.
+
+The trade: you can no longer browse a past watchlist by opening a file. Anything
+committed before this change is still in git history:
+
+```bash
+git show <commit>:data/stats/latest_watchlist.json
+```
+
+And any historical watchlist can be rebuilt exactly by checking out that day's
+listings snapshot and re-running the scorer -- though it will reflect *today's*
+weights and config, not that day's, so it answers "what would I think of that
+market now" rather than "what did I think then".
 
 ## Deploying
 
@@ -93,11 +121,11 @@ scrapers/
 pipeline/
   score.py                     # eligibility gate, then watchlist scoring
   aggregate.py                 # sub-area scorecards
-data/                          # JSON snapshots (committed; this is the time-series)
-  listings/                    # active listings, dated + latest_*.json
-  sold/                        # sold comps, dated + latest_*.json
-  parcels/                     # DCAD parcels, dated + latest_*.json
-  stats/                       # scored watchlist, scorecards, dated + latest_*.json
+data/                          # JSON snapshots
+  listings/                    # active listings -- COMMITTED, irreplaceable time-series
+  sold/                        # sold comps -- COMMITTED, irreplaceable time-series
+  parcels/                     # DCAD parcels -- COMMITTED
+  stats/                       # scored watchlist + scorecards -- GITIGNORED, derived
 src/                           # Observable Framework dashboard
   index.md                     # Watchlist (default page)
   scorecards.md                # Sub-area scorecards

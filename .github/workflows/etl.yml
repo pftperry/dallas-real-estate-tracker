@@ -127,6 +127,21 @@ jobs:
         with:
           node-version: "20"
 
+      # data/stats/ is derived and no longer committed, so this job -- which is a
+      # fresh checkout, separate from etl -- has to rebuild it from the inputs the
+      # etl job just committed. Cheap (well under a second) and it makes the site a
+      # deterministic function of committed inputs + code rather than of whatever
+      # happened to be checked in. The data loaders throw if this is skipped, so a
+      # missing step fails the build instead of publishing an empty watchlist.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rebuild derived stats from committed inputs
+        run: |
+          python -m pipeline.score
+          python -m pipeline.aggregate
+
       - run: npm ci || npm install
       - run: npm run build
 
