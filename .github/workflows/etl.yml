@@ -57,7 +57,17 @@ jobs:
         continue-on-error: true
         run: python -m scrapers.school_zones --refresh
 
+      # Tolerated on purpose. The scraper now exits non-zero rather than
+      # overwriting a good snapshot with zero rows when Redfin captchas, which
+      # would otherwise fail this job and block the Pages deploy entirely -- the
+      # site would quietly stop updating. Instead: keep the last good data, let
+      # the rest of the pipeline run on it, and let the dashboard say so. The
+      # watchlist carries listings_as_of / listings_age_days and the Watchlist
+      # tab renders the scrape date in red once it is 7+ days old, so stale data
+      # is visible rather than silent. Genuine code failures in score/aggregate
+      # below are NOT tolerated and still fail the run.
       - name: Scrape active listings (Redfin)
+        continue-on-error: true
         run: python -m scrapers.redfin --status active
 
       - name: Score watchlist
@@ -65,6 +75,7 @@ jobs:
 
       - name: Scrape sold comps (weekly only)
         if: steps.mode.outputs.mode == 'weekly' || steps.mode.outputs.mode == 'manual'
+        continue-on-error: true
         run: python -m scrapers.redfin --status sold --rate-seconds 6
 
       - name: Refresh DCAD parcels (weekly only)
