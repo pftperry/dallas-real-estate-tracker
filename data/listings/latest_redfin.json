@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-11T12:37:04Z",
+  "as_of": "2026-10-11T13:14:52Z",
   "source": "Redfin gis-csv",
   "status": "active",
   "filters": {
@@ -2549,8 +2549,8 @@
       "hoa_per_month_usd": null,
       "property_type": "Single Family Residential",
       "status": "Active",
-      "next_open_house_start": "",
-      "next_open_house_end": "",
+      "next_open_house_start": "October-11-2026 01:30 PM",
+      "next_open_house_end": "October-11-2026 03:00 PM",
       "url": "https://www.redfin.com/TX/Dallas/566-Hambrick-Rd-75218/home/30908928",
       "lat": 32.8534241,
       "lng": -96.7063654,
